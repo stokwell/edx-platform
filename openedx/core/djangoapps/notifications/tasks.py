@@ -21,7 +21,11 @@ from openedx.core.djangoapps.notifications.base_notification import (
     get_default_values_of_preference,
     get_notification_content
 )
-from openedx.core.djangoapps.notifications.config.waffle import ENABLE_NOTIFICATION_GROUPING, ENABLE_NOTIFICATIONS
+from openedx.core.djangoapps.notifications.config.waffle import (
+    ENABLE_NOTIFICATION_GROUPING,
+    ENABLE_NOTIFICATIONS,
+    ENABLE_PUSH_NOTIFICATIONS
+)
 from openedx.core.djangoapps.notifications.events import notification_generated_event
 from openedx.core.djangoapps.notifications.grouping_notifications import (
     get_user_existing_notifications,
@@ -142,6 +146,8 @@ def send_notifications(user_ids, course_key: str, app_name, notification_type, c
     sender_id = context.pop('sender_id', None)
     default_web_config = get_default_values_of_preference(app_name, notification_type).get('web', False)
     generated_notification_audience = []
+    push_notification_audience = []
+    is_push_notification_enabled = ENABLE_PUSH_NOTIFICATIONS.is_enabled()
 
     for batch_user_ids in get_list_in_batches(user_ids, batch_size):
         logger.debug(f'Sending notifications to {len(batch_user_ids)} users in {course_key}')
@@ -176,6 +182,7 @@ def send_notifications(user_ids, course_key: str, app_name, notification_type, c
                 preference.get_app_config(app_name).get('enabled', False)
             ):
                 notification_preferences = preference.get_channels_for_notification_type(app_name, notification_type)
+                push_notification = is_push_notification_enabled and 'push' in notification_preferences
                 new_notification = Notification(
                     user_id=user_id,
                     app_name=app_name,
@@ -185,8 +192,12 @@ def send_notifications(user_ids, course_key: str, app_name, notification_type, c
                     course_id=course_key,
                     web='web' in notification_preferences,
                     email='email' in notification_preferences,
+                    push=push_notification,
                     group_by_id=group_by_id,
                 )
+                if push_notification:
+                    push_notification_audience.append(user_id)
+
                 if grouping_enabled and existing_notifications.get(user_id, None):
                     group_user_notifications(new_notification, existing_notifications[user_id])
                     if not notifications_generated:
@@ -207,13 +218,16 @@ def send_notifications(user_ids, course_key: str, app_name, notification_type, c
             generated_notification_audience, app_name, notification_type, course_key, content_url,
             generated_notification.content, sender_id=sender_id
         )
-        send_braze_notification_to_mobile_users(generated_notification_audience, generated_notification)
+        send_braze_notification_to_mobile_users(push_notification_audience, generated_notification)
 
 
 def send_braze_notification_to_mobile_users(audience_ids, notification_object):
     """
     Send mobile notifications using Braze api triggered campaigns.
     """
+    if not audience_ids:
+        return
+
     if notification_object.app_name != 'discussion':
         return
 
