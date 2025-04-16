@@ -82,6 +82,22 @@ def is_unit(xblock, parent_xblock=None):
     return False
 
 
+def is_library_content(xblock):
+    """
+    Returns true if the specified xblock is library content.
+    """
+    return xblock.category == 'library_content'
+
+
+def get_parent_if_split_test(xblock):
+    """
+    Returns the parent of the specified xblock if it is a split test, otherwise returns None.
+    """
+    parent_xblock = get_parent_xblock(xblock)
+    if parent_xblock and parent_xblock.category == 'split_test':
+        return parent_xblock
+
+
 def xblock_has_own_studio_page(xblock, parent_xblock=None):
     """
     Returns true if the specified xblock has an associated Studio page. Most xblocks do
@@ -319,8 +335,6 @@ def import_staged_content_from_user_clipboard(parent_key: UsageKey, request) -> 
     """
     from cms.djangoapps.contentstore.views.preview import _load_preview_block
 
-    if not content_staging_api:
-        raise RuntimeError("The required content_staging app is not installed")
     user_clipboard = content_staging_api.get_user_clipboard(request.user.id)
     if not user_clipboard:
         # Clipboard is empty or expired/error/loading
@@ -368,8 +382,6 @@ def import_static_assets_for_library_sync(downstream_xblock: XBlock, lib_block: 
     """
     if not lib_block.runtime.get_block_assets(lib_block, fetch_asset_data=False):
         return StaticFileNotices()
-    if not content_staging_api:
-        raise RuntimeError("The required content_staging app is not installed")
     staged_content = content_staging_api.stage_xblock_temporarily(lib_block, request.user.id, LIBRARY_SYNC_PURPOSE)
     if not staged_content:
         # expired/error/loading
