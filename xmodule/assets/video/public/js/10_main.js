@@ -27,143 +27,127 @@ import VideoContextMenu from 'video/095_video_context_menu.js';
 import VideoSocialSharing from 'video/036_video_social_sharing.js';
 import VideoTranscriptFeedback from 'video/037_video_transcript_feedback.js';
 
-// In the case when the Video constructor will be called before all of the Video
-// dependencies are loaded, we will have a mock function that will collect all the elements that must be initialized as
-// Video elements.
-//
-// Once all of the necessary dependencies are loaded, main code will invoke the mock function with
-// the second parameter set to truthy value. This will trigger the actual Video constructor on all elements
-// that are stored in a temporary list.
-window.Video = (function() {
-    // Temporary storage place for elements that must be initialized as Video elements.
-    var tempCallStack = [];
+// ------------------------
 
-    return function(element, processTempCallStack) {
-        // If mock function was called with second parameter set to truthy value, we invoke the real `window.Video`
-        // on all the stored elements so far.
-        if (processTempCallStack) {
-            $.each(tempCallStack, function(index, el) {
-                // By now, `window.Video` is the real constructor.
-                window.Video(el);
-            });
+console.log('In video_block_main.js file');
 
-            return null;
-        }
-
-        // If normal call to `window.Video` constructor, store the element for later initializing.
-        tempCallStack.push(element);
-
-        // Real Video constructor returns the `state` object. The mock function will return an empty object.
-        return {};
+// Stub gettext if the runtime doesn't provide it
+if (typeof window.gettext === 'undefined') {
+    window.gettext = function (text) {
+        return text;
     };
-}());
+}
 
-var youtubeXhr = null;
-var oldVideo = window.Video;
+(function () {
+    var youtubeXhr = null;
+    var oldVideo = window.Video;
 
-window.Video = function(element) {
-    var el = $(element).find('.video'),
-        id = el.attr('id').replace(/video_/, ''),
-        storage = VideoStorage('VideoState', id),
-        bumperMetadata = el.data('bumper-metadata'),
-        autoAdvanceEnabled = el.data('autoadvance-enabled') === 'True',
-        mainVideoModules = [
-            FocusGrabber, VideoControl, VideoPlayPlaceholder,
-            VideoPlayPauseControl, VideoProgressSlider, VideoSpeedControl,
-            VideoVolumeControl, VideoQualityControl, VideoFullScreen, VideoCaption, VideoCommands,
-            VideoContextMenu, VideoSaveStatePlugin, VideoEventsPlugin, VideoCompletionHandler, VideoTranscriptFeedback
-        ].concat(autoAdvanceEnabled ? [VideoAutoAdvanceControl] : []),
-        bumperVideoModules = [VideoControl, VideoPlaySkipControl, VideoSkipControl,
-            VideoVolumeControl, VideoCaption, VideoCommands, VideoSaveStatePlugin, VideoTranscriptFeedback,
-            VideoEventsBumperPlugin, VideoCompletionHandler],
-        state = {
-            el: el,
-            id: id,
-            metadata: el.data('metadata'),
+    window.Video = function (runtime, element) {
+        console.log('In Video initialize method');
+        var el = $(element).find('.video'),
+            id = el.attr('id').replace(/video_/, ''),
+            storage = VideoStorage('VideoState', id),
+            bumperMetadata = el.data('bumper-metadata'),
+            autoAdvanceEnabled = el.data('autoadvance-enabled') === 'True',
+            mainVideoModules = [
+                FocusGrabber, VideoControl, VideoPlayPlaceholder,
+                VideoPlayPauseControl, VideoProgressSlider, VideoSpeedControl,
+                VideoVolumeControl, VideoQualityControl, VideoFullScreen, VideoCaption, VideoCommands,
+                VideoContextMenu, VideoSaveStatePlugin, VideoEventsPlugin, VideoCompletionHandler, VideoTranscriptFeedback
+            ].concat(autoAdvanceEnabled ? [VideoAutoAdvanceControl] : []),
+            bumperVideoModules = [VideoControl, VideoPlaySkipControl, VideoSkipControl,
+                VideoVolumeControl, VideoCaption, VideoCommands, VideoSaveStatePlugin, VideoTranscriptFeedback,
+                VideoEventsBumperPlugin, VideoCompletionHandler],
+            state = {
+                el: el,
+                id: id,
+                metadata: el.data('metadata'),
+                storage: storage,
+                options: {},
+                youtubeXhr: youtubeXhr,
+                modules: mainVideoModules
+            };
+
+        var getBumperState = function (metadata) {
+            var bumperState = $.extend(true, {
+                el: el,
+                id: id,
+                storage: storage,
+                options: {},
+                youtubeXhr: youtubeXhr
+            }, {metadata: metadata});
+
+            bumperState.modules = bumperVideoModules;
+            bumperState.options = {
+                SaveStatePlugin: {events: ['language_menu:change']}
+            };
+            return bumperState;
+        };
+
+        var player = function (innerState) {
+            return function () {
+                _.extend(innerState.metadata, {autoplay: true, focusFirstControl: true});
+                initialize(innerState, element);
+            };
+        };
+        var onSequenceChange;
+
+        VideoAccessibleMenu(el, {
             storage: storage,
-            options: {},
-            youtubeXhr: youtubeXhr,
-            modules: mainVideoModules
-        };
-
-    var getBumperState = function(metadata) {
-        var bumperState = $.extend(true, {
-            el: el,
-            id: id,
-            storage: storage,
-            options: {},
-            youtubeXhr: youtubeXhr
-        }, {metadata: metadata});
-
-        bumperState.modules = bumperVideoModules;
-        bumperState.options = {
-            SaveStatePlugin: {events: ['language_menu:change']}
-        };
-        return bumperState;
-    };
-
-    var player = function(innerState) {
-        return function() {
-            _.extend(innerState.metadata, {autoplay: true, focusFirstControl: true});
-            initialize(innerState, element);
-        };
-    };
-    var onSequenceChange;
-
-    VideoAccessibleMenu(el, {
-        storage: storage,
-        saveStateUrl: state.metadata.saveStateUrl
-    });
-
-    VideoSocialSharing(el);
-
-    if (bumperMetadata) {
-        VideoPoster(el, {
-            poster: el.data('poster'),
-            onClick: _.once(function() {
-                var mainVideoPlayer = player(state);
-                var bumper, bumperState;
-                if (storage.getItem('isBumperShown')) {
-                    mainVideoPlayer();
-                } else {
-                    bumperState = getBumperState(bumperMetadata);
-                    bumper = new VideoBumper(player(bumperState), bumperState);
-                    state.bumperState = bumperState;
-                    bumper.getPromise().done(function() {
-                        delete state.bumperState;
-                        mainVideoPlayer();
-                    });
-                }
-            })
+            saveStateUrl: state.metadata.saveStateUrl
         });
-    } else {
-        initialize(state, element);
-    }
 
-    if (!youtubeXhr) {
-        youtubeXhr = state.youtubeXhr;
-    }
+        VideoSocialSharing(el);
 
-    el.data('video-player-state', state);
-    onSequenceChange = function() {
-        if (state && state.videoPlayer) {
-            state.videoPlayer.destroy();
+        if (bumperMetadata) {
+            VideoPoster(el, {
+                poster: el.data('poster'),
+                onClick: _.once(function () {
+                    var mainVideoPlayer = player(state);
+                    var bumper, bumperState;
+                    if (storage.getItem('isBumperShown')) {
+                        mainVideoPlayer();
+                    } else {
+                        bumperState = getBumperState(bumperMetadata);
+                        bumper = new VideoBumper(player(bumperState), bumperState);
+                        state.bumperState = bumperState;
+                        bumper.getPromise().done(function () {
+                            delete state.bumperState;
+                            mainVideoPlayer();
+                        });
+                    }
+                })
+            });
+        } else {
+            initialize(state, element);
         }
-        $('.sequence').off('sequence:change', onSequenceChange);
+
+        if (!youtubeXhr) {
+            youtubeXhr = state.youtubeXhr;
+        }
+
+        el.data('video-player-state', state);
+        onSequenceChange = function () {
+            if (state && state.videoPlayer) {
+                state.videoPlayer.destroy();
+            }
+            $('.sequence').off('sequence:change', onSequenceChange);
+        };
+        $('.sequence').on('sequence:change', onSequenceChange);
+
+        // Because the 'state' object is only available inside this closure, we will also make it available to
+        // the caller by returning it. This is necessary so that we can test Video with Jasmine.
+        return state;
+    }
+
+    window.Video.clearYoutubeXhr = function () {
+        youtubeXhr = null;
     };
-    $('.sequence').on('sequence:change', onSequenceChange);
 
-    // Because the 'state' object is only available inside this closure, we will also make it available to
-    // the caller by returning it. This is necessary so that we can test Video with Jasmine.
-    return state;
-};
-
-window.Video.clearYoutubeXhr = function() {
-    youtubeXhr = null;
-};
-
-window.Video.loadYouTubeIFrameAPI = initialize.prototype.loadYouTubeIFrameAPI;
+    window.Video.loadYouTubeIFrameAPI = initialize.prototype.loadYouTubeIFrameAPI;
 
 // Invoke the mock Video constructor so that the elements stored within it can be processed by the real
 // `window.Video` constructor.
-oldVideo(null, true);
+    oldVideo(null, true);
+
+}());
