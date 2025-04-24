@@ -6,14 +6,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+import logging
 from uuid import uuid4
 
 from django.utils.text import slugify
 from opaque_keys.edx.keys import UsageKeyV2
 from opaque_keys.edx.locator import LibraryContainerLocator, LibraryLocatorV2, LibraryUsageLocatorV2
-from openedx_events.content_authoring.data import ContentObjectChangedData, LibraryCollectionData, LibraryContainerData
+from openedx_events.content_authoring.data import (
+    ContentObjectChangedData,
+    LibraryBlockData,
+    LibraryCollectionData,
+    LibraryContainerData,
+)
 from openedx_events.content_authoring.signals import (
     CONTENT_OBJECT_ASSOCIATIONS_CHANGED,
+    LIBRARY_BLOCK_UPDATED,
     LIBRARY_COLLECTION_UPDATED,
     LIBRARY_CONTAINER_CREATED,
     LIBRARY_CONTAINER_DELETED,
@@ -27,7 +34,7 @@ from openedx.core.djangoapps.xblock.api import get_component_from_usage_key
 
 from ..models import ContentLibrary
 from .exceptions import ContentLibraryContainerNotFound
-from .libraries import LibraryXBlockMetadata, PublishableItem
+from .libraries import LibraryXBlockMetadata, PublishableItem, library_component_usage_key
 
 # The public API is only the following symbols:
 __all__ = [
@@ -46,11 +53,54 @@ __all__ = [
     "restore_container",
     "update_container_children",
     "get_containers_contains_component",
+    "publish_container_changes",
 ]
+
+log = logging.getLogger(__name__)
 
 
 class ContainerType(Enum):
+    """
+    The container types supported by content_libraries, and logic to map them to OLX.
+    """
     Unit = "unit"
+    Subsection = "subsection"
+    Section = "section"
+
+    @property
+    def olx_tag(self) -> str:
+        """
+        Canonical XML tag to use when representing this container as OLX.
+
+        For example, Units are encoded as <vertical>...</vertical>.
+
+        These tag names are historical. We keep them around for the backwards compatibility of OLX
+        and for easier interaction with legacy modulestore-powered structural XBlocks
+        (e.g., copy-paste of Units between courses and V2 libraries).
+        """
+        match self:
+            case self.Unit:
+                return "vertical"
+            case self.Subsection:
+                return "sequential"
+            case self.Section:
+                return "chapter"
+        raise TypeError(f"unexpected ContainerType: {self!r}")
+
+    @classmethod
+    def from_source_olx_tag(cls, olx_tag: str) -> 'ContainerType':
+        """
+        Get the ContainerType that this OLX tag maps to.
+        """
+        if olx_tag == "unit":
+            # There is an alternative implementation to VerticalBlock called UnitBlock whose
+            # OLX tag is <unit>. When converting from OLX, we want to handle both <vertical>
+            # and <unit> as Unit containers, although the canonical serialization is still <vertical>.
+            return cls.Unit
+        try:
+            return next(ct for ct in cls if olx_tag == ct.olx_tag)
+        except StopIteration:
+            raise ValueError(f"no container_type for XML tag: <{olx_tag}>") from None
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -60,6 +110,7 @@ class ContainerMetadata(PublishableItem):
     """
     container_key: LibraryContainerLocator
     container_type: ContainerType
+    published_display_name: str | None
 
     @classmethod
     def from_container(cls, library_key, container: Container, associated_collections=None):
@@ -72,7 +123,6 @@ class ContainerMetadata(PublishableItem):
             container=container,
         )
         container_type = ContainerType(container_key.container_type)
-
         published_by = ""
         if last_publish_log and last_publish_log.published_by:
             published_by = last_publish_log.published_by.username
@@ -93,6 +143,7 @@ class ContainerMetadata(PublishableItem):
             modified=draft.created,
             draft_version_num=draft.version_num,
             published_version_num=published.version_num if published else None,
+            published_display_name=published.title if published else None,
             last_published=None if last_publish_log is None else last_publish_log.published_at,
             published_by=published_by,
             last_draft_created=last_draft_created,
@@ -128,7 +179,7 @@ def get_container_from_key(container_key: LibraryContainerLocator, isDeleted=Fal
     Raises ContentLibraryContainerNotFound if no container found, or if the container has been soft deleted.
     """
     assert isinstance(container_key, LibraryContainerLocator)
-    content_library = ContentLibrary.objects.get_by_key(container_key.library_key)
+    content_library = ContentLibrary.objects.get_by_key(container_key.lib_key)
     learning_package = content_library.learning_package
     assert learning_package is not None
     container = authoring_api.get_container_by_key(
@@ -153,7 +204,7 @@ def get_container(container_key: LibraryContainerLocator, include_collections=Fa
     else:
         associated_collections = None
     container_meta = ContainerMetadata.from_container(
-        container_key.library_key,
+        container_key.lib_key,
         container,
         associated_collections=associated_collections,
     )
@@ -182,7 +233,7 @@ def create_container(
         slug = slugify(title, allow_unicode=True) + '-' + uuid4().hex[-6:]
     # Make sure the slug is valid by first creating a key for the new container:
     container_key = LibraryContainerLocator(
-        library_key=library_key,
+        library_key,
         container_type=container_type.value,
         container_id=slug,
     )
@@ -197,7 +248,7 @@ def create_container(
                 created_by=user_id,
             )
         case _:
-            raise ValueError(f"Invalid container type: {container_type}")
+            raise NotImplementedError(f"Library support for {container_type} is in progress")
 
     LIBRARY_CONTAINER_CREATED.send_event(
         library_container=LibraryContainerData(
@@ -217,7 +268,7 @@ def update_container(
     Update a container (e.g. a Unit) title.
     """
     container = get_container_from_key(container_key)
-    library_key = container_key.library_key
+    library_key = container_key.lib_key
 
     assert container.unit
     unit_version = authoring_api.create_next_unit_version(
@@ -244,7 +295,7 @@ def delete_container(
 
     No-op if container doesn't exist or has already been soft-deleted.
     """
-    library_key = container_key.library_key
+    library_key = container_key.lib_key
     container = get_container_from_key(container_key)
 
     affected_collections = authoring_api.get_entity_collections(
@@ -279,7 +330,7 @@ def restore_container(container_key: LibraryContainerLocator) -> None:
     """
     Restore the specified library container.
     """
-    library_key = container_key.library_key
+    library_key = container_key.lib_key
     container = get_container_from_key(container_key, isDeleted=True)
 
     affected_collections = authoring_api.get_entity_collections(
@@ -329,13 +380,13 @@ def get_container_children(
     if container_key.container_type == ContainerType.Unit.value:
         child_components = authoring_api.get_components_in_unit(container.unit, published=published)
         return [LibraryXBlockMetadata.from_component(
-            container_key.library_key,
+            container_key.lib_key,
             entry.component
         ) for entry in child_components]
     else:
         child_entities = authoring_api.get_entities_in_container(container, published=published)
         return [ContainerMetadata.from_container(
-            container_key.library_key,
+            container_key.lib_key,
             entry.entity
         ) for entry in child_entities]
 
@@ -360,7 +411,7 @@ def update_container_children(
     """
     Adds children components or containers to given container.
     """
-    library_key = container_key.library_key
+    library_key = container_key.lib_key
     container_type = container_key.container_type
     container = get_container_from_key(container_key)
     match container_type:
@@ -400,3 +451,41 @@ def get_containers_contains_component(
         ContainerMetadata.from_container(usage_key.context_key, container)
         for container in containers
     ]
+
+
+def publish_container_changes(container_key: LibraryContainerLocator, user_id: int | None) -> None:
+    """
+    Publish all unpublished changes in a container and all its child
+    containers/blocks.
+    """
+    container = get_container_from_key(container_key)
+    library_key = container_key.lib_key
+    content_library = ContentLibrary.objects.get_by_key(library_key)  # type: ignore[attr-defined]
+    learning_package = content_library.learning_package
+    assert learning_package
+    # The core publishing API is based on draft objects, so find the draft that corresponds to this container:
+    drafts_to_publish = authoring_api.get_all_drafts(learning_package.id).filter(entity__pk=container.pk)
+    # Publish the container, which will also auto-publish any unpublished child components:
+    publish_log = authoring_api.publish_from_drafts(
+        learning_package.id,
+        draft_qset=drafts_to_publish,
+        published_by=user_id,
+    )
+    # Update anything that needs to be updated (e.g. search index):
+    for record in publish_log.records.select_related("entity", "entity__container", "entity__component").all():
+        if hasattr(record.entity, "component"):
+            # This is a child component like an XBLock in a Unit that was published:
+            usage_key = library_component_usage_key(library_key, record.entity.component)
+            LIBRARY_BLOCK_UPDATED.send_event(
+                library_block=LibraryBlockData(library_key=library_key, usage_key=usage_key)
+            )
+        elif hasattr(record.entity, "container"):
+            # This is a child container like a Unit, or is the same "container" we published above.
+            LIBRARY_CONTAINER_UPDATED.send_event(
+                library_container=LibraryContainerData(container_key=container_key)
+            )
+        else:
+            log.warning(
+                f"PublishableEntity {record.entity.pk} / {record.entity.key} was modified during publish operation "
+                "but is of unknown type."
+            )
