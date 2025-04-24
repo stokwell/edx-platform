@@ -27,7 +27,6 @@ import VideoContextMenu from 'video/095_video_context_menu.js';
 import VideoSocialSharing from 'video/036_video_social_sharing.js';
 import VideoTranscriptFeedback from 'video/037_video_transcript_feedback.js';
 
-// ------------------------
 
 console.log('In video_block_main.js file');
 
