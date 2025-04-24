@@ -7,7 +7,6 @@ from typing import List
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from edx_django_utils.monitoring import set_code_owner_attribute
@@ -15,7 +14,6 @@ from opaque_keys.edx.keys import CourseKey
 from pytz import UTC
 
 from common.djangoapps.student.models import CourseEnrollment
-from lms.djangoapps.utils import get_braze_client
 from openedx.core.djangoapps.notifications.audience_filters import NotificationFilter
 from openedx.core.djangoapps.notifications.base_notification import (
     get_default_values_of_preference,
@@ -34,13 +32,12 @@ from openedx.core.djangoapps.notifications.grouping_notifications import (
 from openedx.core.djangoapps.notifications.models import (
     CourseNotificationPreference,
     Notification,
-    NotificationBrazeCampaigns,
     get_course_notification_preference_config_version
 )
+from openedx.core.djangoapps.notifications.push.tasks import send_ace_msg_to_braze_push_channel
 from openedx.core.djangoapps.notifications.utils import clean_arguments, get_list_in_batches
 
 
-User = get_user_model()
 logger = get_task_logger(__name__)
 
 
@@ -215,40 +212,7 @@ def send_notifications(user_ids, course_key: str, app_name, notification_type, c
             generated_notification_audience, app_name, notification_type, course_key, content_url,
             generated_notification.content, sender_id=sender_id
         )
-        send_braze_notification_to_mobile_users(push_notification_audience, generated_notification)
-
-
-def send_braze_notification_to_mobile_users(audience_ids, notification_object):
-    """
-    Send mobile notifications using Braze api triggered campaigns.
-    """
-    if not audience_ids:
-        return
-
-    if notification_object.app_name != 'discussion':
-        return
-
-    notification_type = notification_object.notification_type
-    campaign_id = NotificationBrazeCampaigns.get_notification_campaign_id(notification_type)
-    if not campaign_id:
-        return
-
-    post_data = {
-        'trigger_properties': {
-            'notification_type': notification_type,
-            'course_id': str(notification_object.course_id),
-            'content_url': notification_object.content_url,
-            **notification_object.content_context
-        },
-    }
-    emails = list(User.objects.filter(id__in=audience_ids).values_list('email', flat=True))
-    try:
-        braze_client = get_braze_client()
-        if braze_client:
-            braze_client.send_campaign_message(campaign_id=campaign_id, trigger_properties=post_data, emails=emails)
-            logger.info('Sent mobile notification for %s with Braze', notification_type)
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.error('Unable to send mobile notification for %s with Braze. Reason: %s', notification_type, str(exc))
+        send_ace_msg_to_braze_push_channel(push_notification_audience, generated_notification, sender_id)
 
 
 def is_notification_valid(notification_type, context):
