@@ -1,11 +1,6 @@
-(function(define) {
-    'use strict';
+'use strict';
 
-    // VideoContextMenu module.
-    define(
-        'video/095_video_context_menu.js',
-        ['video/00_component.js'],
-        function(Component) {
+import Component from 'video/00_component.js';
             var AbstractItem, AbstractMenu, Menu, Overlay, Submenu, MenuItem;
 
             AbstractItem = Component.extend({
@@ -680,8 +675,102 @@
                         }
                     });
                 }
-
-                return $.Deferred().resolve().promise();
             };
+
+export default function(state, i18n) {
+    var speedCallback = function(event, menuitem, options) {
+            var speed = parseFloat(options.label);
+            state.videoCommands.execute('speed', speed);
+        },
+        options = {
+            items: [{
+                label: i18n.Play,
+                callback: function() {
+                    state.videoCommands.execute('togglePlayback');
+                },
+                initialize: function(menuitem) {
+                    state.el.on({
+                        play: function() {
+                            menuitem.setLabel(i18n.Pause);
+                        },
+                        pause: function() {
+                            menuitem.setLabel(i18n.Play);
+                        }
+                    });
+                }
+            }, {
+                label: state.videoVolumeControl.getMuteStatus() ? i18n.Unmute : i18n.Mute,
+                callback: function() {
+                    state.videoCommands.execute('toggleMute');
+                },
+                initialize: function(menuitem) {
+                    state.el.on({
+                        volumechange: function() {
+                            if (state.videoVolumeControl.getMuteStatus()) {
+                                menuitem.setLabel(i18n.Unmute);
+                            } else {
+                                menuitem.setLabel(i18n.Mute);
+                            }
+                        }
+                    });
+                }
+            }, {
+                label: i18n['Fill browser'],
+                callback: function() {
+                    state.videoCommands.execute('toggleFullScreen');
+                },
+                initialize: function(menuitem) {
+                    state.el.on({
+                        fullscreen: function(event, isFullscreen) {
+                            if (isFullscreen) {
+                                menuitem.setLabel(i18n['Exit full browser']);
+                            } else {
+                                menuitem.setLabel(i18n['Fill browser']);
+                            }
+                        }
+                    });
+                }
+            }, {
+                label: i18n.Speed,
+                items: _.map(state.speeds, function(speed) {
+                    var isSelected = parseFloat(speed) === state.speed;
+                    return {
+                        label: speed + 'x', callback: speedCallback, speed: speed, isSelected: isSelected
+                    };
+                }),
+                initialize: function(menuitem) {
+                    state.el.on({
+                        speedchange: function(event, speed) {
+                            // eslint-disable-next-line no-shadow
+                            var item = menuitem.getChildren().filter(function(item) {
+                                return item.options.speed === speed;
+                            })[0];
+                            if (item) {
+                                item.select();
+                            }
+                        }
+                    });
+                }
+            }
+            ]
+        };
+
+    // eslint-disable-next-line no-shadow
+    $.fn.contextmenu = function(container, options) {
+        return this.each(function() {
+            $(this).data('contextmenu', new Menu(options, this, container));
         });
-}(RequireJS.define));
+    };
+
+    if (!state.isYoutubeType()) {
+        state.el.find('video').contextmenu(state.el, options);
+        state.el.on('destroy', function() {
+            var contextmenu = $(this).find('video').data('contextmenu');
+            if (contextmenu) {
+                contextmenu.destroy();
+            }
+        });
+    }
+
+    return $.Deferred().resolve().promise();
+};

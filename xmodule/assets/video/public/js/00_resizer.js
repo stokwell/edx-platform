@@ -1,238 +1,233 @@
-(function(requirejs, require, define) {
-    define(
-        'video/00_resizer.js',
-        [],
-        function() {
-            var Resizer = function(params) {
-                var defaults = {
-                        container: window,
-                        element: null,
-                        containerRatio: null,
-                        elementRatio: null
-                    },
-                    callbacksList = [],
-                    delta = {
-                        height: 0,
-                        width: 0
-                    },
-                    module = {},
-                    mode = null,
-                    config;
+'use strict';
 
-                // eslint-disable-next-line no-shadow
-                var initialize = function(params) {
-                    if (!config) {
-                        config = defaults;
-                    }
+const Resizer = function(params) {
+    const defaults = {
+        container: window,
+        element: null,
+        containerRatio: null,
+        elementRatio: null
+    };
+    const callbacksList = [];
+    const delta = {
+        height: 0,
+        width: 0
+    };
+    const module = {};
+    let mode = null;
+    let config;
 
-                    config = $.extend(true, {}, config, params);
+    // eslint-disable-next-line no-shadow
+    const initialize = (params) => {
+        if (!config) {
+            config = defaults;
+        }
 
-                    if (!config.element) {
-                        console.log(
-                            'Required parameter `element` is not passed.'
-                        );
-                    }
+        config = $.extend(true, {}, config, params);
 
-                    return module;
-                };
+        if (!config.element) {
+            console.log(
+                'Required parameter `element` is not passed.'
+            );
+        }
 
-                var getData = function() {
-                    var $container = $(config.container),
-                        containerWidth = $container.width() + delta.width,
-                        containerHeight = $container.height() + delta.height,
-                        containerRatio = config.containerRatio,
+        return module;
+    };
 
-                        $element = $(config.element),
-                        elementRatio = config.elementRatio;
+    const getData = () => {
+        const $container = $(config.container);
+        const containerWidth = $container.width() + delta.width;
+        const containerHeight = $container.height() + delta.height;
+        let containerRatio = config.containerRatio;
 
-                    if (!containerRatio) {
-                        containerRatio = containerWidth / containerHeight;
-                    }
+        const $element = $(config.element);
+        let elementRatio = config.elementRatio;
 
-                    if (!elementRatio) {
-                        elementRatio = $element.width() / $element.height();
-                    }
+        if (!containerRatio) {
+            containerRatio = containerWidth / containerHeight;
+        }
 
-                    return {
-                        containerWidth: containerWidth,
-                        containerHeight: containerHeight,
-                        containerRatio: containerRatio,
-                        element: $element,
-                        elementRatio: elementRatio
-                    };
-                };
+        if (!elementRatio) {
+            elementRatio = $element.width() / $element.height();
+        }
 
-                var align = function() {
-                    var data = getData();
+        return {
+            containerWidth,
+            containerHeight,
+            containerRatio,
+            element: $element,
+            elementRatio
+        };
+    };
 
-                    switch (mode) {
-                    case 'height':
-                        alignByHeightOnly();
-                        break;
+    const alignByWidthOnly = () => {
+        const data = getData();
+        const height = data.containerWidth / data.elementRatio;
 
-                    case 'width':
-                        alignByWidthOnly();
-                        break;
+        data.element.css({
+            height,
+            width: data.containerWidth,
+            top: 0.5 * (data.containerHeight - height),
+            left: 0
+        });
 
-                    default:
-                        if (data.containerRatio >= data.elementRatio) {
-                            alignByHeightOnly();
-                        } else {
-                            alignByWidthOnly();
-                        }
-                        break;
-                    }
+        return module;
+    };
 
-                    fireCallbacks();
+    const alignByHeightOnly = () => {
+        const data = getData();
+        const width = data.containerHeight * data.elementRatio;
 
-                    return module;
-                };
+        data.element.css({
+            height: data.containerHeight,
+            width: data.containerHeight * data.elementRatio,
+            top: 0,
+            left: 0.5 * (data.containerWidth - width)
+        });
 
-                var alignByWidthOnly = function() {
-                    var data = getData(),
-                        height = data.containerWidth / data.elementRatio;
+        return module;
+    };
 
-                    data.element.css({
-                        height: height,
-                        width: data.containerWidth,
-                        top: 0.5 * (data.containerHeight - height),
-                        left: 0
-                    });
+    const fireCallbacks = () => {
+        $.each(callbacksList, (index, callback) => {
+            callback();
+        });
+    };
 
-                    return module;
-                };
+    const removeCallback = (func) => {
+        const index = $.inArray(func, callbacksList);
 
-                var alignByHeightOnly = function() {
-                    var data = getData(),
-                        width = data.containerHeight * data.elementRatio;
+        if (index !== -1) {
+            return callbacksList.splice(index, 1);
+        }
+    };
 
-                    data.element.css({
-                        height: data.containerHeight,
-                        width: data.containerHeight * data.elementRatio,
-                        top: 0,
-                        left: 0.5 * (data.containerWidth - width)
-                    });
+    const align = () => {
+        const data = getData();
 
-                    return module;
-                };
+        switch (mode) {
+        case 'height':
+            alignByHeightOnly();
+            break;
 
-                var setMode = function(param) {
-                    if (_.isString(param)) {
-                        mode = param;
-                        align();
-                    }
+        case 'width':
+            alignByWidthOnly();
+            break;
 
-                    return module;
-                };
+        default:
+            if (data.containerRatio >= data.elementRatio) {
+                alignByHeightOnly();
+            } else {
+                alignByWidthOnly();
+            }
+            break;
+        }
 
-                var setElement = function(element) {
-                    config.element = element;
+        fireCallbacks();
 
-                    return module;
-                };
+        return module;
+    };
 
-                var addCallback = function(func) {
-                    if ($.isFunction(func)) {
-                        callbacksList.push(func);
-                    } else {
-                        console.error('[Video info]: TypeError: Argument is not a function.');
-                    }
+    const setMode = (param) => {
+        if (_.isString(param)) {
+            mode = param;
+            align();
+        }
 
-                    return module;
-                };
+        return module;
+    };
 
-                var addOnceCallback = function(func) {
-                    if ($.isFunction(func)) {
-                        var decorator = function() {
-                            func();
-                            removeCallback(func);
-                        };
+    const setElement = (element) => {
+        config.element = element;
 
-                        addCallback(decorator);
-                    } else {
-                        console.error('TypeError: Argument is not a function.');
-                    }
+        return module;
+    };
 
-                    return module;
-                };
+    const addCallback = (func) => {
+        if ($.isFunction(func)) {
+            callbacksList.push(func);
+        } else {
+            console.error('[Video info]: TypeError: Argument is not a function.');
+        }
 
-                var fireCallbacks = function() {
-                    $.each(callbacksList, function(index, callback) {
-                        callback();
-                    });
-                };
+        return module;
+    };
 
-                var removeCallbacks = function() {
-                    callbacksList.length = 0;
-
-                    return module;
-                };
-
-                var removeCallback = function(func) {
-                    var index = $.inArray(func, callbacksList);
-
-                    if (index !== -1) {
-                        return callbacksList.splice(index, 1);
-                    }
-                };
-
-                var resetDelta = function() {
-                    // eslint-disable-next-line no-multi-assign
-                    delta.height = delta.width = 0;
-
-                    return module;
-                };
-
-                var addDelta = function(value, side) {
-                    if (_.isNumber(value) && _.isNumber(delta[side])) {
-                        delta[side] += value;
-                    }
-
-                    return module;
-                };
-
-                var substractDelta = function(value, side) {
-                    if (_.isNumber(value) && _.isNumber(delta[side])) {
-                        delta[side] -= value;
-                    }
-
-                    return module;
-                };
-
-                var destroy = function() {
-                    var data = getData();
-                    data.element.css({
-                        height: '', width: '', top: '', left: ''
-                    });
-                    removeCallbacks();
-                    resetDelta();
-                    mode = null;
-                };
-
-                initialize.apply(module, arguments);
-
-                return $.extend(true, module, {
-                    align: align,
-                    alignByWidthOnly: alignByWidthOnly,
-                    alignByHeightOnly: alignByHeightOnly,
-                    destroy: destroy,
-                    setParams: initialize,
-                    setMode: setMode,
-                    setElement: setElement,
-                    callbacks: {
-                        add: addCallback,
-                        once: addOnceCallback,
-                        remove: removeCallback,
-                        removeAll: removeCallbacks
-                    },
-                    delta: {
-                        add: addDelta,
-                        substract: substractDelta,
-                        reset: resetDelta
-                    }
-                });
+    const addOnceCallback = (func) => {
+        if ($.isFunction(func)) {
+            const decorator = () => {
+                func();
+                removeCallback(func);
             };
 
-            return Resizer;
+            addCallback(decorator);
+        } else {
+            console.error('TypeError: Argument is not a function.');
+        }
+
+        return module;
+    };
+
+    const removeCallbacks = () => {
+        callbacksList.length = 0;
+
+        return module;
+    };
+
+    const resetDelta = () => {
+        // eslint-disable-next-line no-multi-assign
+        delta.height = delta.width = 0;
+
+        return module;
+    };
+
+    const addDelta = (value, side) => {
+        if (_.isNumber(value) && _.isNumber(delta[side])) {
+            delta[side] += value;
+        }
+
+        return module;
+    };
+
+    const substractDelta = (value, side) => {
+        if (_.isNumber(value) && _.isNumber(delta[side])) {
+            delta[side] -= value;
+        }
+
+        return module;
+    };
+
+    const destroy = () => {
+        const data = getData();
+        data.element.css({
+            height: '', width: '', top: '', left: ''
         });
-}(RequireJS.requirejs, RequireJS.require, RequireJS.define));
+        removeCallbacks();
+        resetDelta();
+        mode = null;
+    };
+
+    initialize.apply(module, arguments);
+
+    return $.extend(true, module, {
+        align,
+        alignByWidthOnly,
+        alignByHeightOnly,
+        destroy,
+        setParams: initialize,
+        setMode,
+        setElement,
+        callbacks: {
+            add: addCallback,
+            once: addOnceCallback,
+            remove: removeCallback,
+            removeAll: removeCallbacks
+        },
+        delta: {
+            add: addDelta,
+            substract: substractDelta,
+            reset: resetDelta
+        }
+    });
+};
+
+export default Resizer;
