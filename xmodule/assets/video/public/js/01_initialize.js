@@ -19,6 +19,7 @@ import moment from 'moment';
 import _ from 'underscore';
 
 const moment = moment || window.moment;
+
 /**
  * @function
  *

@@ -5,7 +5,7 @@ import HTML5HLSVideo from 'video/02_html5_hls_video.js';
 import Resizer from 'video/00_resizer.js';
 import HLS from 'hls';
 import _ from 'underscore';
-import Time from '../time.js';
+import Time from './time.js';
 
 const dfd = $.Deferred(),
     VideoPlayer = function(state) {

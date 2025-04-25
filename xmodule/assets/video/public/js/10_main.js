@@ -1,31 +1,31 @@
 'use strict';
 
-import VideoStorage from 'video/00_video_storage.js';
-import initialize from 'video/01_initialize.js';
-import FocusGrabber from 'video/025_focus_grabber.js';
-import VideoAccessibleMenu from 'video/035_video_accessible_menu.js';
-import VideoControl from 'video/04_video_control.js';
-import VideoFullScreen from 'video/04_video_full_screen.js';
-import VideoQualityControl from 'video/05_video_quality_control.js';
-import VideoProgressSlider from 'video/06_video_progress_slider.js';
-import VideoVolumeControl from 'video/07_video_volume_control.js';
-import VideoSpeedControl from 'video/08_video_speed_control.js';
-import VideoAutoAdvanceControl from 'video/08_video_auto_advance_control.js';
-import VideoCaption from 'video/09_video_caption.js';
-import VideoPlayPlaceholder from 'video/09_play_placeholder.js';
-import VideoPlayPauseControl from 'video/09_play_pause_control.js';
-import VideoPlaySkipControl from 'video/09_play_skip_control.js';
-import VideoSkipControl from 'video/09_skip_control.js';
-import VideoBumper from 'video/09_bumper.js';
-import VideoSaveStatePlugin from 'video/09_save_state_plugin.js';
-import VideoEventsPlugin from 'video/09_events_plugin.js';
-import VideoEventsBumperPlugin from 'video/09_events_bumper_plugin.js';
-import VideoPoster from 'video/09_poster.js';
-import VideoCompletionHandler from 'video/09_completion.js';
-import VideoCommands from 'video/10_commands.js';
-import VideoContextMenu from 'video/095_video_context_menu.js';
-import VideoSocialSharing from 'video/036_video_social_sharing.js';
-import VideoTranscriptFeedback from 'video/037_video_transcript_feedback.js';
+import VideoStorage from './00_video_storage';
+import initialize from './01_initialize.js';
+import FocusGrabber from './025_focus_grabber.js';
+import VideoAccessibleMenu from './035_video_accessible_menu.js';
+import VideoControl from './04_video_control.js';
+import VideoFullScreen from './04_video_full_screen.js';
+import VideoQualityControl from './05_video_quality_control.js';
+import VideoProgressSlider from './06_video_progress_slider.js';
+import VideoVolumeControl from './07_video_volume_control.js';
+import VideoSpeedControl from './08_video_speed_control.js';
+import VideoAutoAdvanceControl from './08_video_auto_advance_control.js';
+import VideoCaption from './09_video_caption.js';
+import VideoPlayPlaceholder from './09_play_placeholder.js';
+import VideoPlayPauseControl from './09_play_pause_control.js';
+import VideoPlaySkipControl from './09_play_skip_control.js';
+import VideoSkipControl from './09_skip_control.js';
+import VideoBumper from './09_bumper.js';
+import VideoSaveStatePlugin from './09_save_state_plugin.js';
+import VideoEventsPlugin from './09_events_plugin.js';
+import VideoEventsBumperPlugin from './09_events_bumper_plugin.js';
+import VideoPoster from './09_poster.js';
+import VideoCompletionHandler from './09_completion.js';
+import VideoCommands from './10_commands.js';
+import VideoContextMenu from './095_video_context_menu.js';
+import VideoSocialSharing from './036_video_social_sharing.js';
+import VideoTranscriptFeedback from './037_video_transcript_feedback.js';
 
 
 console.log('In video_block_main.js file');
@@ -145,8 +145,8 @@ if (typeof window.gettext === 'undefined') {
 
     window.Video.loadYouTubeIFrameAPI = initialize.prototype.loadYouTubeIFrameAPI;
 
-// Invoke the mock Video constructor so that the elements stored within it can be processed by the real
-// `window.Video` constructor.
+    // Invoke the mock Video constructor so that the elements stored within it can be processed by the real
+    // `window.Video` constructor.
     oldVideo(null, true);
 
 }());

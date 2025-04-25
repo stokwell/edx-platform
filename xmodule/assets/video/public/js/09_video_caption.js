@@ -4,7 +4,8 @@ import Sjson from 'video/00_sjson.js';
 import AsyncProcess from 'video/00_async_process.js';
 import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
 import Draggabilly from 'draggabilly';
-import Time from 'time.js';
+import Time from './time.js';
+
 import _ from 'underscore';
         /**
          * @desc VideoCaption module exports a function.

@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
-import Time from '../time.js';
+import Time from './time.js';
 
 /**
  * Save state module.

@@ -1,7 +1,7 @@
 'use strict';
 
 // VideoControl module.
-import Time from '../time.js';
+import Time from './time.js';
 
 // VideoControl() function - what this module "exports".
 const VideoControl = function(state) {
