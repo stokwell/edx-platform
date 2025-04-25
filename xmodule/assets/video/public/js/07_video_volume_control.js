@@ -9,7 +9,7 @@ import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
  * @param {Object} i18n The object containing strings with translations.
  * @return {jquery Promise}
  */
-var VolumeControl = function(state, i18n) {
+const VolumeControl = function(state, i18n) {
     if (!(this instanceof VolumeControl)) {
         return new VolumeControl(state, i18n);
     }
@@ -99,7 +99,7 @@ VolumeControl.prototype = {
 
     /** Initializes the module. */
     initialize: function() {
-        var volume;
+        let volume;
 
         if (this.state.isTouch) {
             // iOS doesn't support volume change
@@ -129,7 +129,7 @@ VolumeControl.prototype = {
      * initial configuration.
      */
     render: function() {
-        var container = this.el.find('.volume-slider'),
+        const container = this.el.find('.volume-slider'),
             instructionsId = 'volume-instructions-' + this.state.id;
 
         HtmlUtils.append(container, HtmlUtils.HTML('<div class="ui-slider-handle volume-handle"></div>'));
@@ -218,7 +218,7 @@ VolumeControl.prototype = {
 
     /** Increases current volume level using previously defined step. */
     increaseVolume: function() {
-        var volume = Math.min(this.getVolume() + this.step, this.max);
+        const volume = Math.min(this.getVolume() + this.step, this.max);
 
         this.setVolume(volume, false, false);
         this.el.find('.volume-slider')
@@ -227,7 +227,7 @@ VolumeControl.prototype = {
 
     /** Decreases current volume level using previously defined step. */
     decreaseVolume: function() {
-        var volume = Math.max(this.getVolume() - this.step, this.min);
+        const volume = Math.max(this.getVolume() - this.step, this.min);
 
         this.setVolume(volume, false, false);
         this.el.find('.volume-slider')
@@ -246,7 +246,7 @@ VolumeControl.prototype = {
      * @param {Number} muteStatus Flag to mute/unmute volume.
      */
     mute: function(muteStatus) {
-        var volume;
+        let volume;
 
         this.updateMuteButtonView(muteStatus);
 
@@ -273,7 +273,7 @@ VolumeControl.prototype = {
      * @param {Boolean} isMuted Flag to use muted or unmuted view.
      */
     updateMuteButtonView: function(isMuted) {
-        var action = isMuted ? 'addClass' : 'removeClass';
+        const action = isMuted ? 'addClass' : 'removeClass';
 
         this.el[action]('is-muted');
 
@@ -337,7 +337,7 @@ VolumeControl.prototype = {
             return true;
         }
 
-        var KEY = $.ui.keyCode,
+        const KEY = $.ui.keyCode,
             keyCode = event.keyCode;
 
         // eslint-disable-next-line default-case
@@ -387,7 +387,7 @@ VolumeControl.prototype = {
             return true;
         }
 
-        var KEY = $.ui.keyCode,
+        const KEY = $.ui.keyCode,
             keyCode = event.keyCode;
 
         // eslint-disable-next-line default-case
@@ -440,7 +440,7 @@ VolumeControl.prototype = {
  * @param {Number} max Maximum value for the volume slider.
  * @param {Object} i18n The object containing strings with translations.
  */
-var Accessibility = function(button, min, max, i18n) {
+const Accessibility = function(button, min, max, i18n) {
     this.min = min;
     this.max = max;
     this.button = button;
@@ -509,7 +509,7 @@ Accessibility.prototype = {
  * @param {Number} min Minimum value for the volume slider.
  * @param {Number} max Maximum value for the volume slider.
  */
-var CookieManager = function(min, max) {
+const CookieManager = function(min, max) {
     this.min = min;
     this.max = max;
     this.cookieName = 'video_player_volume_level';
@@ -521,7 +521,7 @@ CookieManager.prototype = {
      * @return {Number} Volume level.
      */
     getVolume: function() {
-        var volume = parseInt($.cookie(this.cookieName), 10);
+        const volume = parseInt($.cookie(this.cookieName), 10);
 
         if (_.isFinite(volume)) {
             volume = Math.max(volume, this.min);

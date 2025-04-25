@@ -64,7 +64,7 @@ EventsBumperPlugin.prototype = {
     },
 
     onSkip: function(event, doNotShowAgain) {
-        var info = {currentTime: this.getCurrentTime()},
+        const info = {currentTime: this.getCurrentTime()},
             eventName = 'edx.video.bumper.' + (doNotShowAgain ? 'dismissed' : 'skipped');
         this.log(eventName, info);
     },
@@ -86,17 +86,17 @@ EventsBumperPlugin.prototype = {
     },
 
     getCurrentTime: function() {
-        var player = this.state.videoPlayer;
+        const player = this.state.videoPlayer;
         return player ? player.currentTime : 0;
     },
 
     getDuration: function() {
-        var player = this.state.videoPlayer;
+        const player = this.state.videoPlayer;
         return player ? player.duration() : 0;
     },
 
     log: function(eventName, data) {
-        var logInfo = _.extend({
+        const logInfo = _.extend({
             host_component_id: this.state.id,
             bumper_id: this.state.config.sources[0] || '',
             duration: this.getDuration(),

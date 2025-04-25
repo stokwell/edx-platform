@@ -3,7 +3,7 @@
 
 import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
 
-var template = HtmlUtils.interpolateHtml(
+const template = HtmlUtils.interpolateHtml(
     HtmlUtils.HTML([
         '<button class="control quality-control is-hidden" aria-disabled="false" title="',
         '{highDefinition}',
@@ -25,7 +25,7 @@ var template = HtmlUtils.interpolateHtml(
 
 // VideoQualityControl() function - what this module "exports".
 const VideoQualityControl = function(state) {
-    var dfd = $.Deferred();
+    const dfd = $.Deferred();
 
     // Changing quality for now only works for YouTube videos.
     if (state.videoType !== 'youtube') {
@@ -51,7 +51,7 @@ const VideoQualityControl = function(state) {
 //     Functions which will be accessible via 'state' object. When called, these functions will
 //     get the 'state' object as a context.
 function _makeFunctionsPublic(state) {
-    var methodsDict = {
+    const methodsDict = {
         destroy: destroy,
         fetchAvailableQualities: fetchAvailableQualities,
         onQualityChange: onQualityChange,
@@ -79,7 +79,7 @@ function destroy() {
 //     way - you don't have to do repeated jQuery element selects.
 function _renderElements(state) {
     // eslint-disable-next-line no-multi-assign
-    var element = state.videoQualityControl.el = $(template.toString());
+    const element = state.videoQualityControl.el = $(template.toString());
     state.videoQualityControl.quality = 'large';
     HtmlUtils.append(state.el.find('.secondary-controls'), HtmlUtils.HTML(element));
 }
@@ -123,7 +123,7 @@ function showQualityControl() {
  * @public
  */
 function fetchAvailableQualities() {
-    var qualities = this.videoPlayer.player.getAvailableQualityLevels();
+    const qualities = this.videoPlayer.player.getAvailableQualityLevels();
 
     this.config.availableHDQualities = _.intersection(
         qualities, ['highres', 'hd1080', 'hd720']
@@ -143,7 +143,7 @@ function fetchAvailableQualities() {
 }
 
 function onQualityChange(value) {
-    var controlStateStr;
+    let controlStateStr;
     this.videoQualityControl.quality = value;
     if (_.contains(this.config.availableHDQualities, value)) {
         controlStateStr = gettext('on');
@@ -163,13 +163,12 @@ function onQualityChange(value) {
 // This function toggles the quality of video only if HD qualities are
 // available.
 function toggleQuality(event) {
-    var newQuality,
-        value = this.videoQualityControl.quality,
+    const value = this.videoQualityControl.quality,
         isHD = _.contains(this.config.availableHDQualities, value);
 
     event.preventDefault();
 
-    newQuality = isHD ? 'large' : 'highres';
+    const newQuality = isHD ? 'large' : 'highres';
 
     this.trigger('videoPlayer.handlePlaybackQualityChange', newQuality);
 }

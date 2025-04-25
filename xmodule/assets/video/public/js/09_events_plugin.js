@@ -88,7 +88,7 @@ EventsPlugin.prototype = {
     },
 
     onSkip: function(event, doNotShowAgain) {
-        var info = {currentTime: this.getCurrentTime()},
+        const info = {currentTime: this.getCurrentTime()},
             eventName = doNotShowAgain ? 'do_not_show_again_video' : 'skip_video';
         this.log(eventName, info);
     },
@@ -141,9 +141,9 @@ EventsPlugin.prototype = {
     },
 
     getCurrentTime: function() {
-        var player = this.state.videoPlayer,
-            startTime = this.state.config.startTime,
-            currentTime;
+        const player = this.state.videoPlayer,
+            startTime = this.state.config.startTime;
+        let currentTime;
         currentTime = player ? player.currentTime : 0;
         // if video didn't start from 0(it's a subsection of video), subtract the additional time at start
         if (startTime) {
@@ -153,16 +153,16 @@ EventsPlugin.prototype = {
     },
 
     getCurrentLanguage: function() {
-        var language = this.state.lang;
+        const language = this.state.lang;
         return language;
     },
 
     log: function(eventName, data) {
         // use startTime and endTime to calculate the duration to handle the case where only a subsection of video is used
-        var endTime = this.state.config.endTime || this.state.duration,
+        const endTime = this.state.config.endTime || this.state.duration,
             startTime = this.state.config.startTime;
 
-        var logInfo = _.extend({
+        const logInfo = _.extend({
             id: this.state.id,
             // eslint-disable-next-line no-nested-ternary
             code: this.state.isYoutubeType() ? this.state.youtubeId() : this.state.canPlayHLS ? 'hls' : 'html5',

@@ -51,7 +51,7 @@ SaveStatePlugin.prototype = {
     bindHandlers: function() {
         if (this.options.events.length) {
             _.each(this.options.events, function(eventName) {
-                var callback;
+                let callback;
                 if (_.has(this.events, eventName)) {
                     callback = this.events[eventName];
                     this.state.el.on(eventName, callback);

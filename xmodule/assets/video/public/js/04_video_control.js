@@ -5,7 +5,7 @@ import Time from '../time.js';
 
 // VideoControl() function - what this module "exports".
 const VideoControl = function(state) {
-    var dfd = $.Deferred();
+    const dfd = $.Deferred();
 
     state.videoControl = {};
 
@@ -26,7 +26,7 @@ const VideoControl = function(state) {
 //     Functions which will be accessible via 'state' object. When called, these functions will
 //     get the 'state' object as a context.
 function _makeFunctionsPublic(state) {
-    var methodsDict = {
+    const methodsDict = {
         destroy: destroy,
         hideControls: hideControls,
         show: show,
@@ -126,7 +126,7 @@ function showControls(event) {
 }
 
 function hideControls() {
-    var _this = this;
+    const _this = this;
 
     this.controlHideTimeout = null;
 
@@ -149,8 +149,9 @@ function hideControls() {
 }
 
 function updateVcrVidTime(params) {
-    var endTime = (this.config.endTime !== null) ? this.config.endTime : params.duration,
-        startTime, currentTime;
+    let endTime = (this.config.endTime !== null) ? this.config.endTime : params.duration;
+    let startTime = 0;
+    let currentTime = 0;
     // in case endTime is accidentally specified as being greater than the video
     endTime = Math.min(endTime, params.duration);
     startTime = this.config.startTime > 0 ? this.config.startTime : 0;

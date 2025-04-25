@@ -7,7 +7,7 @@ import HLS from 'hls';
 import _ from 'underscore';
 import Time from '../time.js';
 
-var dfd = $.Deferred(),
+const dfd = $.Deferred(),
     VideoPlayer = function(state) {
         state.videoPlayer = {};
         _makeFunctionsPublic(state);
@@ -70,7 +70,7 @@ VideoPlayer.prototype = methodsDict;
 //     Functions which will be accessible via 'state' object. When called,
 //     these functions will get the 'state' object as a context.
 function _makeFunctionsPublic(state) {
-    var debouncedF = _.debounce(
+    const debouncedF = _.debounce(
         function(params) {
             // Can't cancel a queued debounced function on destroy
             if (state.videoPlayer) {
@@ -88,7 +88,7 @@ function _makeFunctionsPublic(state) {
 
 // Updates players state, once metadata is loaded for html5 player.
 function onLoadMetadataHtml5() {
-    var player = this.videoPlayer.player.videoEl,
+    const player = this.videoPlayer.player.videoEl,
         videoWidth = player[0].videoWidth || player.width(),
         videoHeight = player[0].videoHeight || player.height();
 
@@ -104,11 +104,11 @@ function onLoadMetadataHtml5() {
 //     have to do repeated jQuery element selects.
 // eslint-disable-next-line no-underscore-dangle
 function _initialize(state) {
-    var youTubeId,
+    let youTubeId,
         player,
         userAgent,
-        commonPlayerConfig,
-        eventToBeTriggered = 'loadedmetadata';
+        commonPlayerConfig;
+    const eventToBeTriggered = 'loadedmetadata';
 
     // The function is called just once to apply pre-defined configurations
     // by student before video starts playing. Waits until the video's
@@ -210,8 +210,8 @@ function _initialize(state) {
 
         state.el.on('initialize', function() {
             // eslint-disable-next-line no-shadow, no-multi-assign
-            var player = state.videoEl = state.el.find('iframe'),
-                videoWidth = player.attr('width') || player.width(),
+            let player = state.videoEl = state.el.find('iframe');
+            const videoWidth = player.attr('width') || player.width(),
                 videoHeight = player.attr('height') || player.height();
 
             player.on('remove', state.videoPlayer.destroy);
@@ -228,10 +228,10 @@ function _initialize(state) {
 
 function _updateVcrAndRegion(state, isYoutube) {
     // eslint-disable-next-line no-shadow
-    var update = function(state) {
+    const update = function(state) {
         // eslint-disable-next-line no-shadow
-        var duration = state.videoPlayer.duration(),
-            time;
+        const duration = state.videoPlayer.duration();
+        let time;
 
         time = state.videoPlayer.figureOutStartingTime(duration);
 
@@ -344,7 +344,7 @@ function _restartUsingFlash(state) {
 // ***************************************************************
 
 function destroy() {
-    var player = this.videoPlayer.player;
+    const player = this.videoPlayer.player;
     this.el.removeClass([
         'is-unstarted', 'is-playing', 'is-paused', 'is-buffered',
         'is-ended', 'is-cued'
@@ -419,7 +419,7 @@ function setPlaybackRate(newSpeed) {
 }
 
 function onSpeedChange(newSpeed) {
-    var time = this.videoPlayer.currentTime;
+    const time = this.videoPlayer.currentTime;
 
     if (this.isFlashMode()) {
         this.videoPlayer.currentTime = Time.convert(
@@ -443,7 +443,7 @@ function onAutoAdvanceChange(enabled) {
 // It is created on a onPlay event. Cleared on a onPause event.
 // Reinitialized on a onSeek event.
 function onSeek(params) {
-    var time = params.time,
+    const time = params.time,
         type = params.type,
         oldTime = this.videoPlayer.currentTime;
     // After the user seeks, the video will start playing from
@@ -457,7 +457,7 @@ function onSeek(params) {
 
 function seekTo(time) {
     // eslint-disable-next-line no-shadow
-    var duration = this.videoPlayer.duration();
+    const duration = this.videoPlayer.duration();
 
     if ((typeof time !== 'number') || (time > duration) || (time < 0)) {
         return false;
@@ -468,7 +468,7 @@ function seekTo(time) {
     if (this.videoPlayer.isPlaying()) {
         this.videoPlayer.stopTimer();
     }
-    var isUnplayed = this.videoPlayer.isUnstarted()
+    const isUnplayed = this.videoPlayer.isUnstarted()
              || this.videoPlayer.isCued();
 
     // Use `cueVideoById` method for youtube video that is not played before.
@@ -513,7 +513,7 @@ function stopTimer() {
 }
 
 function onEnded() {
-    var time = this.videoPlayer.duration();
+    const time = this.videoPlayer.duration();
 
     this.trigger('videoProgressSlider.notifyThroughHandleEnd', {
         end: true
@@ -555,7 +555,7 @@ function handlePlaybackQualityChange(value) {
 }
 
 function onPlaybackQualityChange() {
-    var quality;
+    let quality;
 
     quality = this.videoPlayer.player.getPlaybackQuality();
 
@@ -564,8 +564,8 @@ function onPlaybackQualityChange() {
 }
 
 function onReady() {
-    var _this = this,
-        availablePlaybackRates, baseSpeedSubs,
+    const _this = this;
+    let availablePlaybackRates, baseSpeedSubs,
         player, videoWidth, videoHeight;
 
     dfd.resolve();
@@ -595,7 +595,7 @@ function onReady() {
     availablePlaybackRates = _.filter(
         availablePlaybackRates,
         function(item) {
-            var speed = Number(item);
+            const speed = Number(item);
             return speed > 0.25 && speed <= 5;
         }
     );
@@ -643,7 +643,7 @@ function onReady() {
             this.speeds = [];
             // Recreate it with the supplied frame rates.
             $.each(availablePlaybackRates, function(index, value) {
-                var key = value.toFixed(2).replace(/\.00$/, '.0');
+                const key = value.toFixed(2).replace(/\.00$/, '.0');
 
                 _this.videos[key] = baseSpeedSubs;
                 _this.speeds.push(key);
@@ -664,7 +664,7 @@ function onReady() {
     }
 
     // eslint-disable-next-line no-shadow
-    var duration = this.videoPlayer.duration(),
+    const duration = this.videoPlayer.duration(),
         time = this.videoPlayer.figureOutStartingTime(duration);
 
     // this.duration will be set initially only if duration is coming from edx-val
@@ -724,7 +724,7 @@ function onError(code) {
 
 // eslint-disable-next-line no-shadow
 function figureOutStartEndTime(duration) {
-    var videoPlayer = this.videoPlayer;
+    const videoPlayer = this.videoPlayer;
 
     videoPlayer.startTime = this.config.startTime;
     if (videoPlayer.startTime >= duration) {
@@ -746,14 +746,14 @@ function figureOutStartEndTime(duration) {
 
             // eslint-disable-next-line no-shadow
             function figureOutStartingTime(duration) {
-                var savedVideoPosition = this.config.savedVideoPosition,
+                const savedVideoPosition = this.config.savedVideoPosition;
 
                     // Default starting time is 0. This is the case when
                     // there is not start-time, no previously saved position,
                     // or one (or both) of those values is incorrect.
-                    time = 0,
+                    let time = 0;
 
-                    startTime, endTime;
+                    let startTime, endTime;
 
                 this.videoPlayer.figureOutStartEndTime(duration);
 
@@ -790,9 +790,8 @@ function figureOutStartEndTime(duration) {
             }
 
             function updatePlayTime(time, skip_seek) {
-                var videoPlayer = this.videoPlayer,
-                    endTime = this.videoPlayer.duration(),
-                    youTubeId;
+                const videoPlayer = this.videoPlayer;
+                let endTime = this.videoPlayer.duration();
 
                 if (this.config.endTime) {
                     endTime = Math.min(this.config.endTime, endTime);
@@ -818,32 +817,32 @@ function figureOutStartEndTime(duration) {
             }
 
             function isEnded() {
-                var playerState = this.videoPlayer.player.getPlayerState(),
+                const playerState = this.videoPlayer.player.getPlayerState(),
                     ENDED = this.videoPlayer.PlayerState.ENDED;
 
                 return playerState === ENDED;
             }
 
             function isPlaying() {
-                var playerState = this.videoPlayer.player.getPlayerState();
+                const playerState = this.videoPlayer.player.getPlayerState();
 
                 return playerState === this.videoPlayer.PlayerState.PLAYING;
             }
 
             function isBuffering() {
-                var playerState = this.videoPlayer.player.getPlayerState();
+                const playerState = this.videoPlayer.player.getPlayerState();
 
                 return playerState === this.videoPlayer.PlayerState.BUFFERING;
             }
 
             function isCued() {
-                var playerState = this.videoPlayer.player.getPlayerState();
+                const playerState = this.videoPlayer.player.getPlayerState();
 
                 return playerState === this.videoPlayer.PlayerState.CUED;
             }
 
             function isUnstarted() {
-                var playerState = this.videoPlayer.player.getPlayerState();
+                const playerState = this.videoPlayer.player.getPlayerState();
 
                 return playerState === this.videoPlayer.PlayerState.UNSTARTED;
             }
@@ -867,7 +866,7 @@ function figureOutStartEndTime(duration) {
      * This instability is internal to the player API (or browser internals).
      */
             function duration() {
-                var dur;
+                let dur;
 
                 // Sometimes the YouTube API doesn't finish instantiating all of it's
                 // methods, but the execution point arrives here.

@@ -20,7 +20,7 @@ import _ from 'underscore';
          *
          * @returns {jquery Promise}
          */
-        var VideoCaption = function(state) {
+        const VideoCaption = function(state) {
             if (!(this instanceof VideoCaption)) {
                 return new VideoCaption(state);
             }
@@ -76,9 +76,9 @@ import _ from 'underscore';
             *
             */
             renderElements: function() {
-                var languages = this.state.config.transcriptLanguages;
+                const languages = this.state.config.transcriptLanguages;
 
-                var langHtml = HtmlUtils.interpolateHtml(
+                const langHtml = HtmlUtils.interpolateHtml(
                     HtmlUtils.HTML(
                         [
                             '<div class="grouped-controls">',
@@ -104,7 +104,7 @@ import _ from 'underscore';
                     }
                 );
 
-                var subtitlesHtml = HtmlUtils.interpolateHtml(
+                const subtitlesHtml = HtmlUtils.interpolateHtml(
                     HtmlUtils.HTML(
                         [
                             '<div class="subtitles" role="region" id="transcript-{courseId}">',
@@ -140,7 +140,7 @@ import _ from 'underscore';
             *
             */
             bindHandlers: function() {
-                var state = this.state,
+                const state = this.state,
                     events = [
                         'mouseover', 'mouseout', 'mousedown', 'click', 'focus', 'blur',
                         'keydown'
@@ -199,7 +199,7 @@ import _ from 'underscore';
             },
 
             handleCaptionToggle: function(event) {
-                var KEY = $.ui.keyCode,
+                const KEY = $.ui.keyCode,
                     keyCode = event.keyCode;
 
                 switch (keyCode) {
@@ -212,7 +212,7 @@ import _ from 'underscore';
             },
 
             handleTranscriptToggle: function(event) {
-                var KEY = $.ui.keyCode,
+                const KEY = $.ui.keyCode,
                     keyCode = event.keyCode;
 
                 switch (keyCode) {
@@ -225,9 +225,9 @@ import _ from 'underscore';
             },
 
             handleKeypressLink: function(event) {
-                var KEY = $.ui.keyCode,
-                    keyCode = event.keyCode,
-                    focused, index, total;
+                const KEY = $.ui.keyCode,
+                    keyCode = event.keyCode;
+                let focused, index, total;
 
                 switch (keyCode) {
                 case KEY.UP:
@@ -261,7 +261,7 @@ import _ from 'underscore';
             },
 
             handleKeypress: function(event) {
-                var KEY = $.ui.keyCode,
+                const KEY = $.ui.keyCode,
                     keyCode = event.keyCode;
 
                 switch (keyCode) {
@@ -327,7 +327,7 @@ import _ from 'underscore';
             },
 
             openLanguageMenu: function(event) {
-                var button = this.languageChooserEl,
+                const button = this.languageChooserEl,
                     menu = button.parent().find('.menu');
 
                 event.preventDefault();
@@ -341,7 +341,7 @@ import _ from 'underscore';
             },
 
             closeLanguageMenu: function(event) {
-                var button = this.languageChooserEl;
+                const button = this.languageChooserEl;
                 event.preventDefault();
 
                 button
@@ -457,13 +457,9 @@ import _ from 'underscore';
              * @returns {array} if [startTime, endTime] are defined
              */
             getStartEndTimes: function() {
-                // due to the way config.startTime/endTime are
-                // processed in 03_video_player.js, we assume
-                // endTime can be an integer or null,
-                // and startTime is an integer > 0
-                var config = this.state.config;
-                var startTime = config.startTime * 1000;
-                var endTime = (config.endTime !== null) ? config.endTime * 1000 : null;
+                const config = this.state.config;
+                const startTime = config.startTime * 1000;
+                const endTime = (config.endTime !== null) ? config.endTime * 1000 : null;
                 return [startTime, endTime];
             },
 
@@ -476,11 +472,11 @@ import _ from 'underscore';
             getBoundedCaptions: function() {
                 // get start and caption. If startTime and endTime
                 // are specified, filter by that range.
-                var times = this.getStartEndTimes();
+                const times = this.getStartEndTimes();
                 // eslint-disable-next-line prefer-spread
-                var results = this.sjson.filter.apply(this.sjson, times);
-                var start = results.start;
-                var captions = results.captions;
+                const results = this.sjson.filter.apply(this.sjson, times);
+                const start = results.start;
+                const captions = results.captions;
 
                 return {
                     start: start,
@@ -497,7 +493,7 @@ import _ from 'underscore';
             * @returns {boolean}
             */
             toggleGoogleDisclaimer: function(captions) {
-                var self = this,
+                const self = this,
                     state = this.state,
                     aIGeneratedSpan = '<span id="captions-ai-generated"></span>',
                     captionsAIGenerated = captions.some(caption => caption.includes(aIGeneratedSpan));
@@ -526,7 +522,7 @@ import _ from 'underscore';
             *         specified for the Youtube type player.
             */
             fetchCaption: function(fetchWithYoutubeId) {
-                var self = this,
+                let self = this,
                     state = this.state,
                     language = state.getCurrentLanguage(),
                     url = state.config.transcriptTranslationUrl.replace('__lang__', language),
@@ -562,7 +558,7 @@ import _ from 'underscore';
                     notifyOnError: false,
                     data: data,
                     success: function(sjson) {
-                        var results, start, captions;
+                        let results, start, captions;
                         self.sjson = new Sjson(sjson);
                         results = self.getBoundedCaptions();
                         start = results.start;
@@ -603,7 +599,7 @@ import _ from 'underscore';
                         self.loaded = true;
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        var canFetchWithYoutubeId;
+                        let canFetchWithYoutubeId;
                         console.log('[Video info]: ERROR while fetching captions.');
                         console.log(
                             '[Video info]: STATUS:', textStatus
@@ -622,13 +618,13 @@ import _ from 'underscore';
                                 console.log('[Video info]: Html5 mode fetching caption with youtubeId.'); // eslint-disable-line max-len, no-console
                             } else {
                                 self.hideCaptions(true);
-                                self.languageChooserEl.hide();
-                                self.hideClosedCaptions();
+                                this.languageChooserEl.hide();
+                                this.hideClosedCaptions();
                             }
                         } else {
                             self.hideCaptions(true);
-                            self.languageChooserEl.hide();
-                            self.hideClosedCaptions();
+                            this.languageChooserEl.hide();
+                            this.hideClosedCaptions();
                         }
                     }
                 });
@@ -643,14 +639,14 @@ import _ from 'underscore';
             * @returns {jquery Promise}
             */
             fetchAvailableTranslations: function() {
-                var self = this,
+                let self = this,
                     state = this.state;
 
                 this.availableTranslationsXHR = $.ajaxWithPrefix({
                     url: state.config.transcriptAvailableTranslationsUrl,
                     notifyOnError: false,
                     success: function(response) {
-                        var currentLanguages = state.config.transcriptLanguages,
+                        let currentLanguages = state.config.transcriptLanguages,
                             newLanguages = _.pick(currentLanguages, response);
 
                         // Update property with available currently translations.
@@ -664,7 +660,7 @@ import _ from 'underscore';
                     },
                     error: function() {
                         self.hideCaptions(true);
-                        self.languageChooserEl.hide();
+                        this.languageChooserEl.hide();
                     }
                 });
 
@@ -697,7 +693,7 @@ import _ from 'underscore';
             *
             */
             renderLanguageMenu: function(languages) {
-                var self = this,
+                let self = this,
                     state = this.state,
                     $menu = $('<ol class="langs-list menu">'),
                     currentLang = state.getCurrentLanguage(),
@@ -735,7 +731,7 @@ import _ from 'underscore';
                 );
 
                 $menu.on('click', '.control-lang', function(e) {
-                    var el = $(e.currentTarget).parent(),
+                    let el = $(e.currentTarget).parent(),
                         captionState = self.state,
                         langCode = el.data('lang-code');
 
@@ -774,8 +770,8 @@ import _ from 'underscore';
             *
             */
             buildCaptions: function(container, start, captions) {
-                var process = function(text, index) {
-                    var $spanEl = $('<span>', {
+                let process = function(text, index) {
+                    let $spanEl = $('<span>', {
                         role: 'link',
                         'data-index': index,
                         'data-start': start[index],
@@ -803,9 +799,9 @@ import _ from 'underscore';
             *
             */
             renderCaption: function(start, captions) {
-                var self = this;
+                let self = this;
 
-                var onRender = function() {
+                let onRender = function() {
                     self.addPaddings();
                     // Enables or disables automatic scrolling of the captions when the
                     // video is playing. This feature has to be disabled when tabbing
@@ -858,7 +854,7 @@ import _ from 'underscore';
             *
             */
             addPaddings: function() {
-                var topSpacer = HtmlUtils.interpolateHtml(
+                let topSpacer = HtmlUtils.interpolateHtml(
                     HtmlUtils.HTML([
                         '<li class="spacing" style="height: {height}px">',
                                 '<a href="#transcript-end-{id}" id="transcript-start-{id}" class="transcript-start"></a>', // eslint-disable-line max-len, indent
@@ -870,7 +866,7 @@ import _ from 'underscore';
                     }
                 );
 
-                var bottomSpacer = HtmlUtils.interpolateHtml(
+                let bottomSpacer = HtmlUtils.interpolateHtml(
                     HtmlUtils.HTML([
                         '<li class="spacing" style="height: {height}px">',
                                 '<a href="#transcript-start-{id}" id="transcript-end-{id}" class="transcript-end"></a>', // eslint-disable-line max-len, indent
@@ -902,7 +898,7 @@ import _ from 'underscore';
             *
             */
             captionMouseOverOut: function(event) {
-                var $caption = $(event.target),
+                let $caption = $(event.target),
                     captionIndex = parseInt($caption.attr('data-index'), 10);
 
                 if (captionIndex === this.currentCaptionIndex) {
@@ -921,7 +917,7 @@ import _ from 'underscore';
             *
             */
             captionMouseDown: function(event) {
-                var $caption = $(event.target);
+                let $caption = $(event.target);
 
                 this.isMouseFocus = true;
                 this.autoScrolling = true;
@@ -946,7 +942,7 @@ import _ from 'underscore';
             *
             */
             captionFocus: function(event) {
-                var $caption = $(event.target),
+                let $caption = $(event.target),
                     container = $caption.parent(),
                     captionIndex = parseInt($caption.attr('data-index'), 10);
                 // If the focus comes from a mouse click, hide the outline, turn on
@@ -980,7 +976,7 @@ import _ from 'underscore';
             *
             */
             captionBlur: function(event) {
-                var $caption = $(event.target),
+                let $caption = $(event.target),
                     container = $caption.parent(),
                     captionIndex = parseInt($caption.attr('data-index'), 10);
 
@@ -1014,7 +1010,7 @@ import _ from 'underscore';
             *
             */
             scrollCaption: function() {
-                var el = this.subtitlesEl.find('.current:first');
+                let el = this.subtitlesEl.find('.current:first');
 
                 // Automatic scrolling gets disabled if one of the captions has
                 // received focus through tabbing.
@@ -1037,7 +1033,7 @@ import _ from 'underscore';
             *
             */
             play: function() {
-                var captions, startAndCaptions, start;
+                let captions, startAndCaptions, start;
                 if (this.loaded) {
                     if (!this.rendered) {
                         startAndCaptions = this.getBoundedCaptions();
@@ -1067,7 +1063,7 @@ import _ from 'underscore';
             *
             */
             updatePlayTime: function(time) {
-                var state = this.state,
+                let state = this.state,
                     params, newIndex, times;
 
                 if (this.loaded) {
@@ -1114,7 +1110,7 @@ import _ from 'underscore';
             *
             */
             seekPlayer: function(event) {
-                var state = this.state,
+                let state = this.state,
                     time = parseInt($(event.target).data('start'), 10);
 
                 if (state.isFlashMode()) {
@@ -1197,7 +1193,7 @@ import _ from 'underscore';
             },
 
             showClosedCaptions: function() {
-                var text = gettext('Hide closed captions');
+                let text = gettext('Hide closed captions');
                 this.state.el.addClass('has-captions');
 
                 this.captionDisplayEl
@@ -1222,7 +1218,7 @@ import _ from 'underscore';
             },
 
             hideClosedCaptions: function() {
-                var text = gettext('Turn on closed captioning');
+                let text = gettext('Turn on closed captioning');
                 this.state.el.removeClass('has-captions');
 
                 this.captionDisplayEl
@@ -1256,7 +1252,7 @@ import _ from 'underscore';
             * the block's showCaptions setting.
             */
             setTranscriptVisibility: function() {
-                var hideCaptionsOnRender = !this.state.config.showCaptions;
+                let hideCaptionsOnRender = !this.state.config.showCaptions;
 
                 if ($.cookie('show_transcript') === 'true') {
                     this.hideCaptionsOnLoad = false;
@@ -1305,7 +1301,7 @@ import _ from 'underscore';
             },
 
             listenForDragDrop: function() {
-                var captions = this.captionDisplayEl['0'];
+                let captions = this.captionDisplayEl['0'];
 
                 if (typeof Draggabilly === 'function') {
                     // eslint-disable-next-line no-new
@@ -1322,7 +1318,7 @@ import _ from 'underscore';
             *     otherwise - show.
             */
             hideCaptions: function(hideCaptions, triggerEvent) {
-                var transcriptControlEl = this.transcriptControlEl,
+                let transcriptControlEl = this.transcriptControlEl,
                     self = this,
                     state = this.state,
                     text;
@@ -1378,7 +1374,7 @@ import _ from 'underscore';
             *
             */
             captionHeight: function() {
-                var state = this.state;
+                let state = this.state;
                 if (state.isFullScreen) {
                     return state.container.height() - state.videoFullScreen.height;
                 } else {
@@ -1391,7 +1387,7 @@ import _ from 'underscore';
             *
             */
             setSubtitlesHeight: function() {
-                var height = 0,
+                let height = 0,
                     state = this.state;
                 // on page load captionHidden = undefined
                 if ((state.captionsHidden === undefined && this.hideCaptionsOnLoad)

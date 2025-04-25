@@ -7,7 +7,7 @@ mind, or whether to act, and in acting, to live."
  */
 
 // VideoProgressSlider module.
-var template = [
+const template = [
     '<div class="slider" role="application" title="',
     gettext('Video position. Press space to toggle playback'),
     '"></div>'
@@ -15,7 +15,7 @@ var template = [
 
 // VideoProgressSlider() function - what this module "exports".
 const VideoProgressSlider = function(state) {
-    var dfd = $.Deferred();
+    const dfd = $.Deferred();
 
     state.videoProgressSlider = {};
     _makeFunctionsPublic(state);
@@ -36,7 +36,7 @@ const VideoProgressSlider = function(state) {
 
 /* eslint-disable no-use-before-define */
 function _makeFunctionsPublic(state) {
-    var methodsDict = {
+    const methodsDict = {
         destroy: destroy,
         buildSlider: buildSlider,
         getRangeParams: getRangeParams,
@@ -112,7 +112,7 @@ function _buildHandle(state) {
 // ***************************************************************
 
 function buildSlider() {
-    var sliderContents = edx.HtmlUtils.joinHtml(
+    const sliderContents = edx.HtmlUtils.joinHtml(
         edx.HtmlUtils.HTML('<div class="ui-slider-handle progress-handle"></div>')
     );
 
@@ -138,7 +138,7 @@ function buildSlider() {
 // whole slider). Remember that endTime === null means the end-time
 // is set to the end of video by default.
 function updateStartEndTimeRegion(params) {
-    var start, end, duration, rangeParams;
+    let start, end, duration, rangeParams;
 
     // We must have a duration in order to determine the area of range.
     // It also must be non-zero.
@@ -181,7 +181,7 @@ function updateStartEndTimeRegion(params) {
 }
 
 function getRangeParams(startTime, endTime, duration) {
-    var step = 100 / duration,
+    const step = 100 / duration,
         left = startTime * step,
         width = endTime * step - left;
 
@@ -192,7 +192,7 @@ function getRangeParams(startTime, endTime, duration) {
 }
 
 function onSlide(event, ui) {
-    var time = ui.value,
+    let time = ui.value,
         endTime = this.videoPlayer.duration();
 
     if (this.config.endTime) {
@@ -225,7 +225,7 @@ function onSlide(event, ui) {
 }
 
 function onStop(event, ui) {
-    var _this = this;
+    let _this = this;
 
     this.videoProgressSlider.frozen = true;
 
@@ -251,11 +251,11 @@ function onStop(event, ui) {
 }
 
 function updatePlayTime(params) {
-    var time = Math.floor(params.time);
+    let time = Math.floor(params.time);
     // params.duration could accidentally be construed as a floating
     // point double. Since we're displaying this number, round down
     // to nearest second
-    var endTime = Math.floor(params.duration);
+    let endTime = Math.floor(params.duration);
 
     if (this.config.endTime !== null) {
         endTime = Math.min(this.config.endTime, endTime);
@@ -308,11 +308,11 @@ function notifyThroughHandleEnd(params) {
 // Returns a string describing the current time of video in
 // `%d hours %d minutes %d seconds` format.
 function getTimeDescription(time) {
-    var seconds = Math.floor(time),
+    let seconds = Math.floor(time),
         minutes = Math.floor(seconds / 60),
         hours = Math.floor(minutes / 60),
         i18n = function(value, word) {
-            var msg;
+            let msg;
 
             // eslint-disable-next-line default-case
             switch (word) {

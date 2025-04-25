@@ -66,7 +66,7 @@ VideoCompletionHandler.prototype = {
      *  When destroy is triggered, clean up outstanding resources.
      */
     bindHandlers: function() {
-        var self = this;
+        const self = this;
 
         /** Event handler to check if the video is complete, and submit
          *  a completion if it is.
@@ -108,7 +108,7 @@ VideoCompletionHandler.prototype = {
 
     /** Handler to call when a timeupdate event is triggered */
     handleTimeUpdate: function(currentTime) {
-        var duration;
+        let duration;
         if (this.isComplete) {
             return;
         }
@@ -134,7 +134,7 @@ VideoCompletionHandler.prototype = {
 
     /** Handler to call when youtube metadata is received */
     checkMetadata: function() {
-        var metadata = this.state.metadata[this.state.youtubeId()];
+        const metadata = this.state.metadata[this.state.youtubeId()];
 
         // https://developers.google.com/youtube/v3/docs/videos#contentDetails.contentRating.ytRating
         if (metadata && metadata.contentRating && metadata.contentRating.ytRating === 'ytAgeRestricted') {
@@ -149,8 +149,8 @@ VideoCompletionHandler.prototype = {
 
     /** Submit completion to the LMS */
     markCompletion: function(currentTime) {
-        var self = this;
-        var errmsg;
+        const self = this;
+        let errmsg;
         this.isComplete = true;
         this.lastSentTime = currentTime;
         this.state.el.trigger('complete');

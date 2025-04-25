@@ -18,7 +18,7 @@ import i18n from 'video/00_i18n.js';
 import moment from 'moment';
 import _ from 'underscore';
 
-var moment = moment || window.moment;
+const moment = moment || window.moment;
 /**
  * @function
  *
@@ -29,7 +29,7 @@ var moment = moment || window.moment;
  *     available via this object.
  * @param {DOM element} element Container of the entire Video DOM element.
  */
-var Initialize = function(state, element) {
+const Initialize = function(state, element) {
     _makeFunctionsPublic(state);
 
     state.initialize(element)
@@ -128,7 +128,7 @@ function _renderElements(state) {
     // Require JS. At the time when we reach this code, the stand alone
     // HTML5 player is already loaded, so no further testing in that case
     // is required.
-    var video, onYTApiReady, setupOnYouTubeIframeAPIReady;
+    let video, onYTApiReady, setupOnYouTubeIframeAPIReady;
 
     if (state.videoType === 'youtube') {
         state.youtubeApiAvailable = false;
@@ -227,7 +227,7 @@ function _waitForYoutubeApi(state) {
 }
 
 function loadYouTubeIFrameAPI(scriptTag) {
-    var firstScriptTag = document.getElementsByTagName('script')[0];
+    const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(scriptTag, firstScriptTag);
 }
 
@@ -315,9 +315,9 @@ function _setConfigurations(state) {
 
 // eslint-disable-next-line no-shadow
 function _initializeModules(state, i18n) {
-    var dfd = $.Deferred(),
+    const dfd = $.Deferred(),
         modulesList = $.map(state.modules, function(module) {
-            var options = state.options[module.moduleName] || {};
+            const options = state.options[module.moduleName] || {};
             if (_.isFunction(module)) {
                 return module(state, i18n, options);
             } else if ($.isPlainObject(module)) {
@@ -332,25 +332,25 @@ function _initializeModules(state, i18n) {
 }
 
 function _getConfiguration(data, storage) {
-    var isBoolean = function(value) {
-            var regExp = /^true$/i;
+    const isBoolean = function(value) {
+            const regExp = /^true$/i;
             return regExp.test(value.toString());
-        },
+        };
         // List of keys that will be extracted form the configuration.
-        extractKeys = [],
+    const extractKeys = [];
         // Compatibility keys used to change names of some parameters in
         // the final configuration.
-        compatKeys = {
+    const compatKeys = {
             start: 'startTime',
             end: 'endTime'
-        },
+        };
         // Conversions used to pre-process some configuration data.
-        conversions = {
+    const conversions = {
             showCaptions: isBoolean,
             autoplay: isBoolean,
             autohideHtml5: isBoolean,
             autoAdvance: function(value) {
-                var shouldAutoAdvance = storage.getItem('auto_advance');
+                const shouldAutoAdvance = storage.getItem('auto_advance');
                 if (_.isUndefined(shouldAutoAdvance)) {
                     return isBoolean(value) || false;
                 } else {
@@ -401,8 +401,8 @@ function _getConfiguration(data, storage) {
 
                 return value;
             }
-        },
-        config = {};
+        };
+    let config = {};
 
     data = _.extend({
         startTime: 0,
@@ -508,12 +508,12 @@ function loadHtmlPlayer() {
 // The function set initial configuration and preparation.
 
 function initialize(element) {
-    var self = this,
-        el = this.el,
-        id = this.id,
-        container = el.find('.video-wrapper'),
-        __dfd__ = $.Deferred(),
-        isTouch = onTouchBasedDevice() || '';
+    const self = this;
+    const el = this.el;
+    const id = this.id;
+    const container = el.find('.video-wrapper');
+    const __dfd__ = $.Deferred();
+    const isTouch = onTouchBasedDevice() || '';
 
     if (isTouch) {
         el.addClass('is-touch');
@@ -572,7 +572,7 @@ function initialize(element) {
 
         _waitForYoutubeApi(this);
 
-        var scriptTag = document.createElement('script');
+        const scriptTag = document.createElement('script');
 
         scriptTag.src = this.config.ytApiUrl;
         scriptTag.async = true;
@@ -617,7 +617,7 @@ function parseYoutubeStreams(youtubeStreams) {
     this.videos = {};
 
     _.each(youtubeStreams.split(/,/), function(video) {
-        var speed;
+        let speed;
         video = video.split(/:/);
         speed = this.speedToString(video[0]);
         this.videos[speed] = video[1];
@@ -633,15 +633,15 @@ function parseYoutubeStreams(youtubeStreams) {
 //     example the length of the video can be determined from the meta
 //     data.
 function fetchMetadata() {
-    var self = this,
-        metadataXHRs = [];
+    const self = this;
+    let metadataXHRs = [];
 
     this.metadata = {};
 
     metadataXHRs = _.map(this.videos, function(url, speed) {
         return self.getVideoMetadata(url, function(data) {
             if (data.items.length > 0) {
-                var metaDataItem = data.items[0];
+                const metaDataItem = data.items[0];
                 self.metadata[metaDataItem.id] = metaDataItem.contentDetails;
             }
         });
@@ -672,7 +672,7 @@ function setSpeed(newSpeed) {
     // HTML5 =          [0.75, 1, 1.25, 1.5, 2]
     // Youtube Flash =  [0.75, 1, 1.25, 1.5]
     // Youtube HTML5 =  [0.25, 0.5, 1, 1.5, 2]
-    var map = {
+    const map = {
         0.25: '0.75', // Youtube HTML5 -> HTML5 or Youtube Flash
         '0.50': '0.75', // Youtube HTML5 -> HTML5 or Youtube Flash
         0.75: '0.50', // HTML5 or Youtube Flash -> Youtube HTML5
@@ -694,7 +694,7 @@ function setAutoAdvance(enabled) {
 }
 
 function getVideoMetadata(url, callback) {
-    var youTubeEndpoint;
+    let youTubeEndpoint;
     if (!(_.isString(url))) {
         url = this.videos['1.0'] || '';
     }
@@ -719,7 +719,7 @@ function getVideoMetadata(url, callback) {
 }
 
 function youtubeId(speed) {
-    var currentSpeed = this.isFlashMode() ? this.speed : '1.0';
+    const currentSpeed = this.isFlashMode() ? this.speed : '1.0';
 
     return this.videos[speed]
     || this.videos[currentSpeed]
@@ -741,7 +741,7 @@ function getDuration() {
  *                      Otherwise, `html5` is used by default.
  */
 function setPlayerMode(mode) {
-    var supportedModes = ['html5', 'flash'];
+    const supportedModes = ['html5', 'flash'];
 
     mode = _.contains(supportedModes, mode) ? mode : 'html5';
     this.currentPlayerMode = mode;
@@ -785,7 +785,7 @@ function setPlayerMode(mode) {
             }
 
             function getCurrentLanguage() {
-                var keys = _.keys(this.config.transcriptLanguages);
+                const keys = _.keys(this.config.transcriptLanguages);
 
                 if (keys.length) {
                     if (!_.contains(keys, this.lang)) {
@@ -814,12 +814,12 @@ function setPlayerMode(mode) {
      *     state.videoPlayer.pause({'param1': 10});
      */
             function trigger(objChain) {
-                var extraParameters = Array.prototype.slice.call(arguments, 1),
-                    i, tmpObj, chain;
+                const extraParameters = Array.prototype.slice.call(arguments, 1);
+                let i, tmpObj;
+                const chain = objChain.split('.');
 
                 // Remember that 'this' is the 'state' object.
                 tmpObj = this;
-                chain = objChain.split('.');
 
                 // At the end of the loop the variable 'tmpObj' will either be the
                 // correct object/function to trigger/invoke. If the 'chain' chain of

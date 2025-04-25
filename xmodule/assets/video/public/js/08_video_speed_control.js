@@ -10,7 +10,7 @@ import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
  * @param {object} state The object containing the state of the video player.
  * @return {jquery Promise}
  */
-var SpeedControl = function(state) {
+const SpeedControl = function(state) {
     if (!(this instanceof SpeedControl)) {
         return new SpeedControl(state);
     }
@@ -68,7 +68,7 @@ SpeedControl.prototype = {
 
     /** Initializes the module. */
     initialize: function() {
-        var state = this.state;
+        const state = this.state;
 
         if (!this.isPlaybackRatesSupported(state)) {
             console.log(
@@ -94,7 +94,7 @@ SpeedControl.prototype = {
      * @param {string} currentSpeed The current speed set to the player.
      */
     render: function(speeds, currentSpeed) {
-        var speedsContainer = this.speedsContainer,
+        const speedsContainer = this.speedsContainer,
             reversedSpeeds = speeds.concat().reverse(),
             instructionsId = 'speed-instructions-' + this.state.id,
             speedsList = $.map(reversedSpeeds, function(speed) {
@@ -177,7 +177,7 @@ SpeedControl.prototype = {
      *   false: Browser doesn't support playbackRate functionality.
      */
     isPlaybackRatesSupported: function(state) {
-        var isHtml5 = state.videoType === 'html5',
+        const isHtml5 = state.videoType === 'html5',
             isTouch = state.isTouch,
             video = document.createElement('video');
 
@@ -230,7 +230,7 @@ SpeedControl.prototype = {
      * not differs from current speed.
      */
     setSpeed: function(speed, silent, forceUpdate) {
-        var newSpeed = this.state.speedToString(speed);
+        const newSpeed = this.state.speedToString(speed);
         if (newSpeed !== this.currentSpeed || forceUpdate) {
             this.speedsContainer
                 .find('li')
@@ -249,7 +249,7 @@ SpeedControl.prototype = {
     },
 
     resetActiveSpeed: function() {
-        var speedOptions = this.speedsContainer.find('li');
+        const speedOptions = this.speedsContainer.find('li');
 
         $(speedOptions).each(function(index, el) {
             $(el).removeClass('is-active')
@@ -259,7 +259,7 @@ SpeedControl.prototype = {
     },
 
     setActiveSpeed: function(speed) {
-        var speedOption = this.speedsContainer.find('li[data-speed="' + this.state.speedToString(speed) + '"]');
+        const speedOption = this.speedsContainer.find('li[data-speed="' + this.state.speedToString(speed) + '"]');
 
         speedOption.addClass('is-active')
             .find('.speed-option')
@@ -283,7 +283,7 @@ SpeedControl.prototype = {
      * @param {jquery Event} event
      */
     clickLinkHandler: function(event) {
-        var el = $(event.currentTarget).parent(),
+        const el = $(event.currentTarget).parent(),
             speed = $(el).data('speed');
 
         this.resetActiveSpeed();
@@ -322,7 +322,7 @@ SpeedControl.prototype = {
      * @param {jquery Event} event
      */
     keyDownMenuHandler: function(event) {
-        var KEY = $.ui.keyCode,
+        const KEY = $.ui.keyCode,
             keyCode = event.keyCode;
 
         // eslint-disable-next-line default-case
@@ -355,7 +355,7 @@ SpeedControl.prototype = {
             return true;
         }
 
-        var KEY = $.ui.keyCode,
+        const KEY = $.ui.keyCode,
             self = this,
             parent = $(event.currentTarget).parent(),
             index = parent.index(),

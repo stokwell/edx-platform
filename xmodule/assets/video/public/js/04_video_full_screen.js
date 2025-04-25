@@ -2,7 +2,7 @@
 
 import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
 
-var template = [
+const template = [
     '<button class="control add-fullscreen" aria-disabled="false" title="',
     gettext('Fill browser'),
     '" aria-label="',
@@ -22,7 +22,7 @@ var template = [
 //
 //     For more information about the Fullscreen Web API see MDN:
 //     https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
-var prefixedFullscreenProperties = (function() {
+const prefixedFullscreenProperties = (function() {
     if ('fullscreenEnabled' in document) {
         return {
             fullscreenElement: 'fullscreenElement',
@@ -156,7 +156,7 @@ function handleFullscreenChange() {
 }
 
 function updateControlsHeight() {
-    var controls = this.el.find('.video-controls'),
+    const controls = this.el.find('.video-controls'),
         slider = this.videoFullScreen.sliderEl;
     this.videoFullScreen.height = getControlsHeight(controls, slider);
     return this.videoFullScreen.height;
@@ -186,8 +186,8 @@ function toggleHandler(event) {
 }
 
 function handleExit() {
-    var fullScreenClassNameEl = this.el.add(document.documentElement);
-    var closedCaptionsEl = this.el.find('.closed-captions');
+    const fullScreenClassNameEl = this.el.add(document.documentElement);
+    const closedCaptionsEl = this.el.find('.closed-captions');
 
     if (this.isFullScreen === false) {
         return;
@@ -213,8 +213,8 @@ function handleExit() {
 }
 
 function handleEnter() {
-    var fullScreenClassNameEl = this.el.add(document.documentElement);
-    var closedCaptionsEl = this.el.find('.closed-captions');
+    const fullScreenClassNameEl = this.el.add(document.documentElement);
+    const closedCaptionsEl = this.el.find('.closed-captions');
 
     if (this.isFullScreen === true) {
         return;
@@ -278,7 +278,7 @@ function exitHandler(event) {
 //     Functions which will be accessible via 'state' object. When called, these functions will
 //     get the 'state' object as a context.
 function makeFunctionsPublic(state) {
-    var methodsDict = {
+    const methodsDict = {
         destroy: destroy,
         enter: enter,
         exit: exit,
@@ -297,7 +297,7 @@ function makeFunctionsPublic(state) {
 
 // VideoControl() function - what this module "exports".
 const VideoFullScreen = function(state) {
-    var dfd = $.Deferred();
+    const dfd = $.Deferred();
 
     // eslint-disable-next-line no-param-reassign
     state.videoFullScreen = {};

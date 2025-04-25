@@ -38,12 +38,12 @@ if (typeof window.gettext === 'undefined') {
 }
 
 (function () {
-    var youtubeXhr = null;
-    var oldVideo = window.Video;
+    let youtubeXhr = null;
+    const oldVideo = window.Video;
 
     window.Video = function (runtime, element) {
         console.log('In Video initialize method');
-        var el = $(element).find('.video'),
+        const el = $(element).find('.video'),
             id = el.attr('id').replace(/video_/, ''),
             storage = VideoStorage('VideoState', id),
             bumperMetadata = el.data('bumper-metadata'),
@@ -67,8 +67,8 @@ if (typeof window.gettext === 'undefined') {
                 modules: mainVideoModules
             };
 
-        var getBumperState = function (metadata) {
-            var bumperState = $.extend(true, {
+        const getBumperState = function (metadata) {
+            const bumperState = $.extend(true, {
                 el: el,
                 id: id,
                 storage: storage,
@@ -83,13 +83,13 @@ if (typeof window.gettext === 'undefined') {
             return bumperState;
         };
 
-        var player = function (innerState) {
+        const player = function (innerState) {
             return function () {
                 _.extend(innerState.metadata, {autoplay: true, focusFirstControl: true});
                 initialize(innerState, element);
             };
         };
-        var onSequenceChange;
+        let onSequenceChange;
 
         VideoAccessibleMenu(el, {
             storage: storage,
@@ -102,8 +102,8 @@ if (typeof window.gettext === 'undefined') {
             VideoPoster(el, {
                 poster: el.data('poster'),
                 onClick: _.once(function () {
-                    var mainVideoPlayer = player(state);
-                    var bumper, bumperState;
+                    const mainVideoPlayer = player(state);
+                    let bumper, bumperState;
                     if (storage.getItem('isBumperShown')) {
                         mainVideoPlayer();
                     } else {

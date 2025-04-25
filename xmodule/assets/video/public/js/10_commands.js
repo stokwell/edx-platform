@@ -1,6 +1,6 @@
 'use strict';
 
-var VideoCommands, Command, playCommand, pauseCommand, togglePlaybackCommand,
+let VideoCommands, Command, playCommand, pauseCommand, togglePlaybackCommand,
     toggleMuteCommand, toggleFullScreenCommand, setSpeedCommand, skipCommand;
 /**
  * Video commands module.
@@ -38,7 +38,7 @@ VideoCommands.prototype = {
     },
 
     execute: function(command) {
-        var args = [].slice.call(arguments, 1) || [];
+        const args = [].slice.call(arguments, 1) || [];
 
         if (_.has(this.commands, command)) {
             this.commands[command].execute.apply(this, [this.state].concat(args));
@@ -48,7 +48,7 @@ VideoCommands.prototype = {
     },
 
     getCommands: function() {
-        var commands = {},
+        const commands = {},
             commandsList = [
                 playCommand, pauseCommand, togglePlaybackCommand,
                 toggleMuteCommand, toggleFullScreenCommand, setSpeedCommand,

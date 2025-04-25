@@ -10,7 +10,7 @@ import _ from 'underscore';
  * @param {object} state The object containing the state of the video player.
  * @return {jquery Promise}
  */
-var AutoAdvanceControl = function(state) {
+const AutoAdvanceControl = function(state) {
     if (!(this instanceof AutoAdvanceControl)) {
         return new AutoAdvanceControl(state);
     }
@@ -53,7 +53,7 @@ AutoAdvanceControl.prototype = {
 
     /** Initializes the module. */
     initialize: function() {
-        var state = this.state;
+        const state = this.state;
 
         this.el = $(this.template);
         this.render();
@@ -88,7 +88,7 @@ AutoAdvanceControl.prototype = {
     },
 
     onClick: function(event) {
-        var enabled = !this.state.auto_advance;
+        const enabled = !this.state.auto_advance;
         event.preventDefault();
         this.setAutoAdvance(enabled);
         this.el.trigger('autoadvancechange', [enabled]);
@@ -109,7 +109,7 @@ AutoAdvanceControl.prototype = {
     autoPlay: function() {
         // Only autoplay the video if it's the first component of the unit.
         // If a unit has more than one video, no more than one will autoplay.
-        var isFirstComponent = this.state.el.parents('.vert-0').length === 1;
+        const isFirstComponent = this.state.el.parents('.vert-0').length === 1;
         if (this.state.auto_advance && isFirstComponent) {
             this.state.videoCommands.execute('play');
         }

@@ -8,7 +8,7 @@
  * @param {Object} i18n The object containing strings with translations.
  * @return {jquery Promise}
  */
-var PlayPauseControl = function(state, i18n) {
+const PlayPauseControl = function(state, i18n) {
     if (!(this instanceof PlayPauseControl)) {
         return new PlayPauseControl(state, i18n);
     }

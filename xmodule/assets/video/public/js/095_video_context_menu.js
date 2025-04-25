@@ -1,7 +1,7 @@
 'use strict';
 
 import Component from 'video/00_component.js';
-            var AbstractItem, AbstractMenu, Menu, Overlay, Submenu, MenuItem;
+            let AbstractItem, AbstractMenu, Menu, Overlay, Submenu, MenuItem;
 
             AbstractItem = Component.extend({
                 initialize: function(options) {
@@ -40,7 +40,7 @@ import Component from 'video/00_component.js';
                     return this.element;
                 },
                 addChild: function(child) {
-                    var firstChild = null,
+                    let firstChild = null,
                         lastChild = null;
                     if (this.hasChildren()) {
                         lastChild = this.getLastChild();
@@ -72,12 +72,12 @@ import Component from 'video/00_component.js';
                     return this;
                 },
                 getNext: function() {
-                    var item = this.next;
+                    let item = this.next;
                     while (item.isHidden() && this.id !== item.id) { item = item.next; }
                     return item;
                 },
                 getPrev: function() {
-                    var item = this.prev;
+                    let item = this.prev;
                     while (item.isHidden() && this.id !== item.id) { item = item.prev; }
                     return item;
                 },
@@ -85,7 +85,7 @@ import Component from 'video/00_component.js';
                     return null;
                 },
                 getRoot: function() {
-                    var item = this;
+                    let item = this;
                     while (item.parent) { item = item.parent; }
                     return item;
                 },
@@ -99,7 +99,7 @@ import Component from 'video/00_component.js';
                     return this.getElement().is(':hidden');
                 },
                 getSiblings: function() {
-                    var items = [],
+                    let items = [],
                         item = this;
                     while (item.next && item.next.id !== this.id) {
                         item = item.next;
@@ -131,7 +131,7 @@ import Component from 'video/00_component.js';
                 },
 
                 populateElement: function() {
-                    var fragment = document.createDocumentFragment();
+                    const fragment = document.createDocumentFragment();
 
                     _.each(this.getChildren(), function(child) {
                         fragment.appendChild(child.populateElement()[0]);
@@ -155,7 +155,7 @@ import Component from 'video/00_component.js';
 
                 itemHandler: function(event) {
                     event.preventDefault();
-                    var item = $(event.target).data('menu');
+                    const item = $(event.target).data('menu');
                     // eslint-disable-next-line default-case
                     switch (event.type) {
                     case 'keydown':
@@ -214,7 +214,7 @@ import Component from 'video/00_component.js';
                 },
 
                 appendContent: function(content) {
-                    var $content = $(content);
+                    const $content = $(content);
                     this.getElement().append($content);
                     return this;
                 },
@@ -228,7 +228,7 @@ import Component from 'video/00_component.js';
 
                 build: function(container, items) {
                     _.each(items, function(item) {
-                        var child;
+                        let child;
                         if (_.has(item, 'items')) {
                             child = this.build((new Submenu(item, this.contextmenuElement)), item.items);
                         } else {
@@ -245,7 +245,7 @@ import Component from 'video/00_component.js';
                 },
 
                 open: function() {
-                    var $menu = (this.isRendered) ? this.getElement() : this.populateElement();
+                    const $menu = (this.isRendered) ? this.getElement() : this.populateElement();
                     this.container.append($menu);
                     AbstractItem.prototype.open.call(this);
                     this.overlay.show(this.container);
@@ -271,7 +271,7 @@ import Component from 'video/00_component.js';
                 },
 
                 pointInContainerBox: function(x, y) {
-                    var containerOffset = this.contextmenuElement.offset(),
+                    const containerOffset = this.contextmenuElement.offset(),
                         containerBox = {
                             x0: containerOffset.left,
                             y0: containerOffset.top,
@@ -303,7 +303,7 @@ import Component from 'video/00_component.js';
                 },
 
                 keyDownHandler: function(event, item) {
-                    var KEY = $.ui.keyCode,
+                    const KEY = $.ui.keyCode,
                         keyCode = event.keyCode;
 
                     // eslint-disable-next-line default-case
@@ -354,14 +354,14 @@ import Component from 'video/00_component.js';
                 },
 
                 show: function(container) {
-                    var $elem = $(this.getElement());
+                    const $elem = $(this.getElement());
                     $(container).append($elem);
                     this.delegateEvents();
                     return this;
                 },
 
                 delegateEvents: function() {
-                    var self = this;
+                    const self = this;
                     $(document)
                         .on('click' + this.ns, function() {
                             if (_.isFunction(self.clickHandler)) {
@@ -390,7 +390,7 @@ import Component from 'video/00_component.js';
                 },
 
                 createElement: function() {
-                    var $spanElem,
+                    let $spanElem,
                         $listElem,
                         $element = $('<li />', {
                             class: ['submenu-item', 'menu-item', this.options.prefix + 'submenu-item'].join(' '),
@@ -418,7 +418,7 @@ import Component from 'video/00_component.js';
                 },
 
                 appendContent: function(content) {
-                    var $content = $(content);
+                    const $content = $(content);
                     this.list.append($content);
                     return this;
                 },
@@ -437,7 +437,7 @@ import Component from 'video/00_component.js';
                 },
 
                 keyDownHandler: function(event) {
-                    var KEY = $.ui.keyCode,
+                    const KEY = $.ui.keyCode,
                         keyCode = event.keyCode;
 
                     // eslint-disable-next-line default-case
@@ -496,7 +496,7 @@ import Component from 'video/00_component.js';
 
             MenuItem = AbstractItem.extend({
                 createElement: function() {
-                    var classNames = [
+                    const classNames = [
                         'menu-item', this.options.prefix + 'menu-item',
                         this.options.isSelected ? 'is-selected' : ''
                     ].join(' ');
@@ -561,7 +561,7 @@ import Component from 'video/00_component.js';
                 },
 
                 keyDownHandler: function(event) {
-                    var KEY = $.ui.keyCode,
+                    const KEY = $.ui.keyCode,
                         keyCode = event.keyCode;
 
                     // eslint-disable-next-line default-case
@@ -582,8 +582,8 @@ import Component from 'video/00_component.js';
 
             // VideoContextMenu() function - what this module 'exports'.
             return function(state, i18n) {
-                var speedCallback = function(event, menuitem, options) {
-                        var speed = parseFloat(options.label);
+                const speedCallback = function(event, menuitem, options) {
+                        const speed = parseFloat(options.label);
                         state.videoCommands.execute('speed', speed);
                     },
                     options = {
@@ -637,7 +637,7 @@ import Component from 'video/00_component.js';
                         }, {
                             label: i18n.Speed,
                             items: _.map(state.speeds, function(speed) {
-                                var isSelected = parseFloat(speed) === state.speed;
+                                const isSelected = parseFloat(speed) === state.speed;
                                 return {
                                     label: speed + 'x', callback: speedCallback, speed: speed, isSelected: isSelected
                                 };
@@ -646,7 +646,7 @@ import Component from 'video/00_component.js';
                                 state.el.on({
                                     speedchange: function(event, speed) {
                                         // eslint-disable-next-line no-shadow
-                                        var item = menuitem.getChildren().filter(function(item) {
+                                        const item = menuitem.getChildren().filter(function(item) {
                                             return item.options.speed === speed;
                                         })[0];
                                         if (item) {
@@ -669,7 +669,7 @@ import Component from 'video/00_component.js';
                 if (!state.isYoutubeType()) {
                     state.el.find('video').contextmenu(state.el, options);
                     state.el.on('destroy', function() {
-                        var contextmenu = $(this).find('video').data('contextmenu');
+                        const contextmenu = $(this).find('video').data('contextmenu');
                         if (contextmenu) {
                             contextmenu.destroy();
                         }
@@ -678,8 +678,8 @@ import Component from 'video/00_component.js';
             };
 
 export default function(state, i18n) {
-    var speedCallback = function(event, menuitem, options) {
-            var speed = parseFloat(options.label);
+    const speedCallback = function(event, menuitem, options) {
+            const speed = parseFloat(options.label);
             state.videoCommands.execute('speed', speed);
         },
         options = {
@@ -733,7 +733,7 @@ export default function(state, i18n) {
             }, {
                 label: i18n.Speed,
                 items: _.map(state.speeds, function(speed) {
-                    var isSelected = parseFloat(speed) === state.speed;
+                    const isSelected = parseFloat(speed) === state.speed;
                     return {
                         label: speed + 'x', callback: speedCallback, speed: speed, isSelected: isSelected
                     };
@@ -742,7 +742,7 @@ export default function(state, i18n) {
                     state.el.on({
                         speedchange: function(event, speed) {
                             // eslint-disable-next-line no-shadow
-                            var item = menuitem.getChildren().filter(function(item) {
+                            const item = menuitem.getChildren().filter(function(item) {
                                 return item.options.speed === speed;
                             })[0];
                             if (item) {
@@ -765,7 +765,7 @@ export default function(state, i18n) {
     if (!state.isYoutubeType()) {
         state.el.find('video').contextmenu(state.el, options);
         state.el.on('destroy', function() {
-            var contextmenu = $(this).find('video').data('contextmenu');
+            const contextmenu = $(this).find('video').data('contextmenu');
             if (contextmenu) {
                 contextmenu.destroy();
             }

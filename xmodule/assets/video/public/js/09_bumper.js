@@ -75,13 +75,13 @@ VideoBumper.prototype = {
     },
 
     bindHandlers: function() {
-        var events = ['ended', 'error'].join(' ');
+        const events = ['ended', 'error'].join(' ');
         this.element.on(events, this.showMainVideoHandler);
         this.element.on('timeupdate', this.skipByDuration);
     },
 
     saveState: function() {
-        var info = {bumper_last_view_date: true};
+        const info = {bumper_last_view_date: true};
         if (this.doNotShowAgain) {
             _.extend(info, {bumper_do_not_show_again: true});
         }
@@ -91,7 +91,7 @@ VideoBumper.prototype = {
     },
 
     destroy: function() {
-        var events = ['ended', 'error'].join(' ');
+        const events = ['ended', 'error'].join(' ');
         this.element.off(events, this.showMainVideoHandler);
         this.element.off({
             timeupdate: this.skipByDuration,
