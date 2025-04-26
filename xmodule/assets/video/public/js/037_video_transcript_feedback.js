@@ -1,3 +1,4 @@
+// VideoTranscriptFeedbackHandler module.
 'use strict';
 
 import _ from 'underscore';
@@ -15,35 +16,35 @@ import _ from 'underscore';
  * @this {object} The global window object.
  *
  */
-class VideoTranscriptFeedbackHandler {
-    constructor(state) {
-        if (!(this instanceof VideoTranscriptFeedbackHandler)) {
-            return new VideoTranscriptFeedbackHandler(state);
-        }
 
-        _.bindAll(this, 'destroy', 'getFeedbackForCurrentTranscript', 'markAsPositiveFeedback', 'markAsNegativeFeedback', 'markAsEmptyFeedback',
-            'selectThumbsUp', 'selectThumbsDown', 'unselectThumbsUp', 'unselectThumbsDown', 'thumbsUpClickHandler', 'thumbsDownClickHandler',
-            'sendFeedbackForCurrentTranscript', 'onHideLanguageMenu', 'getCurrentLanguage', 'loadAndSetVisibility', 'showWidget', 'hideWidget'
-        );
-
-        this.state = state;
-        this.state.videoTranscriptFeedback = this;
-        this.currentTranscriptLanguage = this.state.lang;
-        this.transcriptLanguages = this.state.config.transcriptLanguages;
-
-        if (this.state.el.find('.wrapper-transcript-feedback').length) {
-            this.initialize();
-        }
-
-        return false;
+const VideoTranscriptFeedback = (state) => {
+    if (!(this instanceof VideoTranscriptFeedback)) {
+        return new VideoTranscriptFeedback(state);
     }
 
-    destroy() {
+    _.bindAll(this, 'destroy', 'getFeedbackForCurrentTranscript', 'markAsPositiveFeedback', 'markAsNegativeFeedback', 'markAsEmptyFeedback',
+        'selectThumbsUp', 'selectThumbsDown', 'unselectThumbsUp', 'unselectThumbsDown', 'thumbsUpClickHandler', 'thumbsDownClickHandler',
+        'sendFeedbackForCurrentTranscript', 'onHideLanguageMenu', 'getCurrentLanguage', 'loadAndSetVisibility', 'showWidget', 'hideWidget'
+    );
+
+    this.state = state;
+    this.state.videoTranscriptFeedback = this;
+    this.currentTranscriptLanguage = this.state.lang;
+    this.transcriptLanguages = this.state.config.transcriptLanguages;
+
+    if (this.state.el.find('.wrapper-transcript-feedback').length) {
+        this.initialize();
+    }
+
+    return false;
+};
+
+VideoTranscriptFeedback.prototype = {
+    destroy: function () {
         this.state.el.off(this.events);
-    }
+    },
 
-    // Initializes the module.
-    initialize() {
+    initialize: function () {
         this.el = this.state.el.find('.wrapper-transcript-feedback');
 
         this.videoId = this.el.data('video-id');
@@ -61,20 +62,20 @@ class VideoTranscriptFeedbackHandler {
         };
         this.loadAndSetVisibility();
         this.bindHandlers();
-    }
+    },
 
-    bindHandlers() {
+    bindHandlers: function () {
         this.state.el.on(this.events);
-    }
+    },
 
-    getFeedbackForCurrentTranscript() {
-        const self = this;
-        const url = self.aiTranslationsUrl + '/transcript-feedback' + '?transcript_language=' + self.currentTranscriptLanguage + '&video_id=' + self.videoId + '&user_id=' + self.userId;
+    getFeedbackForCurrentTranscript: function () {
+        var self = this;
+        var url = self.aiTranslationsUrl + '/transcript-feedback' + '?transcript_language=' + self.currentTranscriptLanguage + '&video_id=' + self.videoId + '&user_id=' + self.userId;
 
         $.ajax({
             url: url,
             type: 'GET',
-            success: function(data) {
+            success: function (data) {
                 if (data && data.value === true) {
                     self.markAsPositiveFeedback();
                     self.currentFeedback = true;
@@ -88,79 +89,79 @@ class VideoTranscriptFeedbackHandler {
                     }
                 }
             },
-            error: function(error) {
+            error: function (error) {
                 self.markAsEmptyFeedback();
                 self.currentFeedback = null;
             }
         });
-    }
+    },
 
-    markAsPositiveFeedback() {
+    markAsPositiveFeedback: function () {
         this.selectThumbsUp();
         this.unselectThumbsDown();
-    }
+    },
 
-    markAsNegativeFeedback() {
+    markAsNegativeFeedback: function () {
         this.selectThumbsDown();
         this.unselectThumbsUp();
-    }
+    },
 
-    markAsEmptyFeedback() {
+    markAsEmptyFeedback: function () {
         this.unselectThumbsUp();
         this.unselectThumbsDown();
-    }
+    },
 
-    selectThumbsUp() {
-        const thumbsUpIcon = this.thumbsUpButton.find('.thumbs-up-icon');
+    selectThumbsUp: function () {
+        var thumbsUpIcon = this.thumbsUpButton.find('.thumbs-up-icon');
         if (thumbsUpIcon[0].classList.contains('fa-thumbs-o-up')) {
             thumbsUpIcon[0].classList.remove("fa-thumbs-o-up");
             thumbsUpIcon[0].classList.add("fa-thumbs-up");
         }
-    }
+    },
 
-    selectThumbsDown() {
-        const thumbsDownIcon = this.thumbsDownButton.find('.thumbs-down-icon');
+    selectThumbsDown: function () {
+        var thumbsDownIcon = this.thumbsDownButton.find('.thumbs-down-icon');
         if (thumbsDownIcon[0].classList.contains('fa-thumbs-o-down')) {
             thumbsDownIcon[0].classList.remove("fa-thumbs-o-down");
             thumbsDownIcon[0].classList.add("fa-thumbs-down");
         }
-    }
+    },
 
-    unselectThumbsUp() {
-        const thumbsUpIcon = this.thumbsUpButton.find('.thumbs-up-icon');
+    unselectThumbsUp: function () {
+        var thumbsUpIcon = this.thumbsUpButton.find('.thumbs-up-icon');
         if (thumbsUpIcon[0].classList.contains('fa-thumbs-up')) {
             thumbsUpIcon[0].classList.remove("fa-thumbs-up");
             thumbsUpIcon[0].classList.add("fa-thumbs-o-up");
         }
-    }
+    },
 
-    unselectThumbsDown() {
-        const thumbsDownIcon = this.thumbsDownButton.find('.thumbs-down-icon');
+    unselectThumbsDown: function () {
+        var thumbsDownIcon = this.thumbsDownButton.find('.thumbs-down-icon');
         if (thumbsDownIcon[0].classList.contains('fa-thumbs-down')) {
             thumbsDownIcon[0].classList.remove("fa-thumbs-down");
             thumbsDownIcon[0].classList.add("fa-thumbs-o-down");
         }
-    }
+    },
 
-    thumbsUpClickHandler() {
+    thumbsUpClickHandler: function () {
         if (this.currentFeedback) {
             this.sendFeedbackForCurrentTranscript(null);
         } else {
             this.sendFeedbackForCurrentTranscript(true);
         }
-    }
+    },
 
-    thumbsDownClickHandler() {
+    thumbsDownClickHandler: function () {
         if (this.currentFeedback === false) {
             this.sendFeedbackForCurrentTranscript(null);
         } else {
             this.sendFeedbackForCurrentTranscript(false);
         }
-    }
+    },
 
-    sendFeedbackForCurrentTranscript(feedbackValue) {
-        const self = this;
-        const url = self.aiTranslationsUrl + '/transcript-feedback/';
+    sendFeedbackForCurrentTranscript: function (feedbackValue) {
+        var self = this;
+        var url = self.aiTranslationsUrl + '/transcript-feedback/';
         $.ajax({
             url: url,
             type: 'POST',
@@ -171,7 +172,7 @@ class VideoTranscriptFeedbackHandler {
                 user_id: self.userId,
                 value: feedbackValue,
             },
-            success: function(data) {
+            success: function (data) {
                 if (data && data.value === true) {
                     self.markAsPositiveFeedback();
                     self.currentFeedback = true;
@@ -185,35 +186,35 @@ class VideoTranscriptFeedbackHandler {
                     }
                 }
             },
-            error: function() {
+            error: function () {
                 self.markAsEmptyFeedback();
                 self.currentFeedback = null;
             }
         });
-    }
+    },
 
-    onHideLanguageMenu() {
-        const newLanguageSelected = this.getCurrentLanguage();
+    onHideLanguageMenu: function () {
+        var newLanguageSelected = this.getCurrentLanguage();
         if (this.currentTranscriptLanguage !== newLanguageSelected) {
             this.currentTranscriptLanguage = this.getCurrentLanguage();
             this.loadAndSetVisibility();
         }
-    }
+    },
 
-    getCurrentLanguage() {
-        const language = this.state.lang;
+    getCurrentLanguage: function () {
+        var language = this.state.lang;
         return language;
-    }
+    },
 
-    loadAndSetVisibility() {
-        const self = this;
-        const url = self.aiTranslationsUrl + '/video-transcript' + '?transcript_language=' + self.currentTranscriptLanguage + '&video_id=' + self.videoId;
+    loadAndSetVisibility: function () {
+        var self = this;
+        var url = self.aiTranslationsUrl + '/video-transcript' + '?transcript_language=' + self.currentTranscriptLanguage + '&video_id=' + self.videoId;
 
         $.ajax({
             url: url,
             type: 'GET',
             async: false,
-            success: function(data) {
+            success: function (data) {
                 if (data && data.status === 'Completed') {
                     self.showWidget();
                     self.getFeedbackForCurrentTranscript();
@@ -221,19 +222,20 @@ class VideoTranscriptFeedbackHandler {
                     self.hideWidget();
                 }
             },
-            error: function(error) {
+            error: function (error) {
                 self.hideWidget();
             }
         });
-    }
+    },
 
-    showWidget() {
+    showWidget: function () {
         this.el.show();
-    }
+    },
 
-    hideWidget() {
+    hideWidget: function () {
         this.el.hide();
     }
-}
+};
 
-export default VideoTranscriptFeedbackHandler;
+// Export as ES6 default
+export default VideoTranscriptFeedback;
