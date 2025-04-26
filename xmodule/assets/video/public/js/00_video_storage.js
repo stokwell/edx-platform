@@ -86,10 +86,10 @@ const VideoStorage = function(namespace, id) {
     }());
 
     return {
-        clear,
-        getItem,
-        removeItem,
-        setItem
+        clear: clear,
+        getItem: getItem,
+        removeItem: removeItem,
+        setItem: setItem
     };
 };
 
