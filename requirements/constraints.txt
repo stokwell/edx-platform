@@ -140,3 +140,5 @@ pact-python<3.0.0
 # Date 2025-10-21
 # Issue: https://github.com/openedx/edx-platform/issues/37515
 social-auth-core==4.7.0
+aiohttp>=3.13.3 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
