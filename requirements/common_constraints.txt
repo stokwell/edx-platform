@@ -22,3 +22,4 @@
 # elastic search changelog: https://www.elastic.co/guide/en/enterprise-search/master/release-notes-7.14.0.html
 # See https://github.com/openedx/edx-platform/issues/35126 for more info
 elasticsearch<7.14.0
+urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
